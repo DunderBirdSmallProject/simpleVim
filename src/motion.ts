@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import { posix } from 'path';
-import { appendFileSync } from 'fs';
+import { isWordSeparator } from './config';
 
 // make sure that when all these functions below
 // was called, the editor exists!
@@ -100,7 +99,7 @@ function nextChar(editor: vscode.TextEditor, c: String): vscode.Position {
         }
         pChar++;
     }
-    return new vscode.Position(line, text.length);
+    return new vscode.Position(line, text.length-1);
 }
 function preChar(editor: vscode.TextEditor, c: string): vscode.Position {
     const cursorPos = editor.selection.active;
@@ -109,6 +108,32 @@ function preChar(editor: vscode.TextEditor, c: string): vscode.Position {
     const text = editor.document.lineAt(line).text;
     while(pChar >= 0) {
         if(text[pChar] === c[0]) {
+            return new vscode.Position(line, pChar);
+        }
+        pChar--;
+    }
+    return new vscode.Position(line, 0);
+}
+function nextWord(editor: vscode.TextEditor): vscode.Position {
+    const cursorPos = editor.selection.active;
+    const line = cursorPos.line;
+    let pChar = cursorPos.character + 1;
+    const text = editor.document.lineAt(line).text;
+    while(pChar < text.length) {
+        if(isWordSeparator(text[pChar])) {
+            return new vscode.Position(line, pChar);
+        }
+        pChar++;
+    }
+    return new vscode.Position(line, text.length-1);
+}
+function lastWord(editor: vscode.TextEditor): vscode.Position {
+    const cursorPos = editor.selection.active;
+    const line = cursorPos.line;
+    let pChar = cursorPos.character - 1;
+    const text = editor.document.lineAt(line).text;
+    while(pChar >= 0) {
+        if(isWordSeparator(text[pChar])) {
             return new vscode.Position(line, pChar);
         }
         pChar--;
