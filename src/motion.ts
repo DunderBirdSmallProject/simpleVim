@@ -23,6 +23,8 @@ function currentLineEnd(editor: vscode.TextEditor, pos: vscode.Position): vscode
     return currentLine(editor, pos).range.end;
 }
 
+// note that the end of Line is not the position of the last character
+// but the next of that.
 function leftChar(pos: vscode.Position): vscode.Position {
     if(pos.character > 0) {
         return new vscode.Position(pos.line, pos.character-1);
