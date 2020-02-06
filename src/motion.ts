@@ -3,140 +3,153 @@ import { isWordSeparator } from './config';
 
 // make sure that when all these functions below
 // was called, the editor exists!
+interface Motion {
+    (pos: vscode.Position, ...arg: any[]): vscode.Position | undefined;
+}
 
-function currentLine(editor: vscode.TextEditor): vscode.TextLine {
-    const cursorPos = editor.selection.active;
-    return editor.document.lineAt(cursorPos.line);
+function currentLine(editor: vscode.TextEditor, pos: vscode.Position): vscode.TextLine {
+    return editor.document.lineAt(pos.line);
 }
 function lineLength(editor: vscode.TextEditor, cnt: number): number {
     return editor.document.lineAt(cnt).text.length;
 }
-function currentLineLength(editor: vscode.TextEditor): number {
-    return currentLine(editor).text.length;
+function currentLineLength(editor: vscode.TextEditor, pos: vscode.Position): number {
+    return currentLine(editor, pos).text.length;
+}
+function currentLineBegin(editor: vscode.TextEditor, pos: vscode.Position): vscode.Position {
+    return currentLine(editor, pos).range.start;
+}
+function currentLineEnd(editor: vscode.TextEditor, pos: vscode.Position): vscode.Position {
+    return currentLine(editor, pos).range.end;
 }
 
-function currentPos(editor: vscode.TextEditor): vscode.Position {
-    return editor.selection.active;
+function leftChar(pos: vscode.Position): vscode.Position {
+    if(pos.character > 0) {
+        return new vscode.Position(pos.line, pos.character-1);
+    }
+    else {
+        return pos;
+    }
 }
-function currentLineBegin(editor: vscode.TextEditor): vscode.Position {
-    return currentLine(editor).range.start;
+function rightChar(pos: vscode.Position): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        const maxCharacter = currentLineLength(editor, pos);
+        if(pos.character < maxCharacter) {
+            return new vscode.Position(pos.line, pos.character+1);
+        }
+    }
+    return pos;
 }
-function currentLineEnd(editor: vscode.TextEditor): vscode.Position {
-    return currentLine(editor).range.end;
+function upChar(pos: vscode.Position): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        if(pos.line > 0) {
+            return new vscode.Position(pos.line-1, Math.min(pos.character, lineLength(editor, pos.line-1)));
+        }
+    }
+    return pos;
+}
+function downChar(pos: vscode.Position): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        if(pos.line < editor.document.lineCount) {
+            return new vscode.Position(pos.line+1, Math.min(pos.character, lineLength(editor, pos.line+1)));
+        }
+    }
+    return pos;
+}
+function downCnt(pos: vscode.Position, cnt: number): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        let nextLineCnt : number;
+        let nextCharacter: number;
+        nextLineCnt = Math.min(editor.document.lineCount, pos.line+cnt);
+        nextCharacter = Math.min(pos.character, lineLength(editor, nextLineCnt));
+        return new vscode.Position(nextLineCnt, nextCharacter);
+    }
+    return pos;
+}
+function upCnt(pos: vscode.Position, cnt: number): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        let nextLineCnt : number;
+        let nextCharacter: number;
+        nextLineCnt = Math.max(0, pos.line-cnt);
+        nextCharacter = Math.min(pos.character, lineLength(editor, nextLineCnt));
+        return new vscode.Position(nextLineCnt, nextCharacter);
+    }
+    return pos;
+}
+function nextCharOnLine(pos: vscode.Position, c: string): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        const text = currentLine(editor, pos).text;
+        let index = text.indexOf(c, pos.character+1);
+        if(index > pos.character) {
+            return new vscode.Position(pos.line, index);
+        } else {
+            return new vscode.Position(pos.line, text.length-1);
+        }
+    }
+    return pos;
+}
+function previousCharOnLine(pos: vscode.Position, c: string): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        const text = currentLine(editor, pos).text;
+        let pChar = pos.character - 1;
+        while(pChar >= 0) {
+            if(text[pChar] === c[0]) {
+                return new vscode.Position(pos.line, pChar);
+            }
+            pChar--;
+        }
+        return new vscode.Position(pos.line, 0);
+    }
+    return pos;
+}
+function nextWordOnLine(pos: vscode.Position): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        const text = currentLine(editor, pos).text;
+        let pChar = pos.character + 1;
+        while(pChar < text.length) {
+            if(isWordSeparator(text[pChar])) {
+                return new vscode.Position(pos.line, pChar);
+            }
+            pChar++;
+        }
+        return new vscode.Position(pos.line, text.length-1);
+    }
+    return pos;
+}
+function lastWordOnLine(pos: vscode.Position): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        const text = currentLine(editor, pos).text;
+        let pChar = pos.character - 1;
+        while(pChar >= 0) {
+            if(isWordSeparator(text[pChar])) {
+                return new vscode.Position(pos.line, pChar);
+            }
+            pChar--;
+        }
+        return new vscode.Position(pos.line, 0);
+    }
+    return pos;
+}
+function startLine(pos: vscode.Position): vscode.Position {
+    return new vscode.Position(pos.line, 0);
+}
+function endLine(pos: vscode.Position): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        return new vscode.Position(pos.line, lineLength(editor, pos.line)-1);
+    }
+    return pos;
 }
 
-function leftChar(editor: vscode.TextEditor): vscode.Position {
-    const cursorPos = editor.selection.active;
-    if(cursorPos.character > 0) {
-        return new vscode.Position(cursorPos.line, cursorPos.character-1);
-    }
-    else {
-        return cursorPos;
-    }
-}
-function rightChar(editor: vscode.TextEditor): vscode.Position {
-    const cursorPos = editor.selection.active;
-    const maxCharacter = currentLineLength(editor);
-    if(cursorPos.character < maxCharacter) {
-        return new vscode.Position(cursorPos.line, cursorPos.character+1);
-    }
-    else {
-        return cursorPos;
-    }
-}
-function upChar(editor: vscode.TextEditor): vscode.Position {
-    const cursorPos = editor.selection.active;
-    const line = cursorPos.line;
-    if(line > 0) {
-        const maxCharacter = lineLength(editor, line-1);
-        return new vscode.Position(cursorPos.line-1, Math.min(maxCharacter, cursorPos.character));
-    }
-    else {
-        return cursorPos;
-    }
-}
-function downChar(editor: vscode.TextEditor): vscode.Position {
-    const cursorPos = editor.selection.active;
-    const line = cursorPos.line;
-    if(line < editor.document.lineCount - 1) {
-        const maxCharacter = lineLength(editor, line+1);
-        return new vscode.Position(cursorPos.line+1, Math.min(maxCharacter, cursorPos.character));
-    }
-    else {
-        return cursorPos;
-    }
-}
-function downCnt(editor: vscode.TextEditor, cnt: number): vscode.Position {
-    const cursorPos = editor.selection.active;
-    const line = cursorPos.line;
-    let nextLineCnt: number;
-    if(line + cnt < editor.document.lineCount) {
-        nextLineCnt = line + cnt;
-    } else {
-        nextLineCnt = editor.document.lineCount-1;
-    }
-    return new vscode.Position(nextLineCnt, Math.min(lineLength(editor, nextLineCnt), cursorPos.character));
-}
-function upCnt(editor: vscode.TextEditor, cnt: number): vscode.Position {
-    const cursorPos = editor.selection.active;
-    const line = cursorPos.line;
-    let nextLineCnt: number;
-    if(line - cnt >= 0) {
-        nextLineCnt = line - cnt;
-    } else {
-        nextLineCnt = 0;
-    }
-    return new vscode.Position(nextLineCnt, Math.min(lineLength(editor, nextLineCnt), cursorPos.character));
-}
-function nextChar(editor: vscode.TextEditor, c: String): vscode.Position {
-    const cursorPos = editor.selection.active;
-    const line = cursorPos.line;
-    let pChar = cursorPos.character + 1;
-    const text = editor.document.lineAt(line).text;
-    while(pChar < text.length) {
-        if(text[pChar] === c[0]) {
-            return new vscode.Position(line, pChar);
-        }
-        pChar++;
-    }
-    return new vscode.Position(line, text.length-1);
-}
-function preChar(editor: vscode.TextEditor, c: string): vscode.Position {
-    const cursorPos = editor.selection.active;
-    const line = cursorPos.line;
-    let pChar = cursorPos.character - 1;
-    const text = editor.document.lineAt(line).text;
-    while(pChar >= 0) {
-        if(text[pChar] === c[0]) {
-            return new vscode.Position(line, pChar);
-        }
-        pChar--;
-    }
-    return new vscode.Position(line, 0);
-}
-function nextWord(editor: vscode.TextEditor): vscode.Position {
-    const cursorPos = editor.selection.active;
-    const line = cursorPos.line;
-    let pChar = cursorPos.character + 1;
-    const text = editor.document.lineAt(line).text;
-    while(pChar < text.length) {
-        if(isWordSeparator(text[pChar])) {
-            return new vscode.Position(line, pChar);
-        }
-        pChar++;
-    }
-    return new vscode.Position(line, text.length-1);
-}
-function lastWord(editor: vscode.TextEditor): vscode.Position {
-    const cursorPos = editor.selection.active;
-    const line = cursorPos.line;
-    let pChar = cursorPos.character - 1;
-    const text = editor.document.lineAt(line).text;
-    while(pChar >= 0) {
-        if(isWordSeparator(text[pChar])) {
-            return new vscode.Position(line, pChar);
-        }
-        pChar--;
-    }
-    return new vscode.Position(line, 0);
-}
+export { leftChar, rightChar, upChar, downChar, downCnt, upCnt,
+            nextCharOnLine, previousCharOnLine, nextWordOnLine, lastWordOnLine,
+            startLine, endLine };

@@ -8,3 +8,7 @@ export function getWordSeparatorConfig(): string {
 export function isWordSeparator(c: String): boolean {
     return getWordSeparatorConfig().indexOf(c[0]) !== -1;
 }
+
+export function getSvimEsc(): string {
+    return ",jk";
+}
