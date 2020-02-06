@@ -114,10 +114,20 @@ export let operation0Dict: OperationDict = {
         moveCursorWrapper(motion.rightChar)(editor, v, range, arg);
         setInsertMode(editor, v, range, arg);
     },
+    "o": (editor, v, range, arg) => {
+        editor.edit(e => {
+            const curPos = editor.selection.active;
+            const endPos = motion.endLine(curPos);
+            e.insert(endPos, '\n');
+        }).then(() => {
+            moveCursorWrapper(motion.downChar)(editor, v, range, arg);
+            setInsertMode(editor, v, range, arg);
+        });
+    },
     "O": (editor, v, range, arg) => {
         editor.edit(e => {
             const curPos = editor.selection.active;
-            e.insert(new vscode.Position(curPos.line, 0), '\n');
+            e.insert(motion.startLine(curPos), '\n');
         }).then(() => {
             moveCursorWrapper(motion.upChar)(editor, v, range, arg);
             setInsertMode(editor, v, range, arg);

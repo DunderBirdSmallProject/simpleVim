@@ -145,7 +145,7 @@ function startLine(pos: vscode.Position): vscode.Position {
 function endLine(pos: vscode.Position): vscode.Position {
     const editor = vscode.window.activeTextEditor;
     if(editor) {
-        return new vscode.Position(pos.line, lineLength(editor, pos.line)-1);
+        return new vscode.Position(pos.line, lineLength(editor, pos.line));
     }
     return pos;
 }
