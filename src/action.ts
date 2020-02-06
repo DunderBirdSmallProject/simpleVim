@@ -69,11 +69,11 @@ export function compile(parseResult: NormalResult): CompileResult | undefined {
         const curPos = vscode.window.activeTextEditor.selection.active;
         let f: Operation;
         if(isOperation0) {
-            f = operation0Dict[parseResult.motionStr];
+            f = operation0Dict[parseResult.operationStr];
         } else if(isOperation1) {
-            f = operation1Dict[parseResult.motionStr];
+            f = operation1Dict[parseResult.operationStr];
         } else {
-            f = operation2Dict[parseResult.motionStr];
+            f = operation2Dict[parseResult.operationStr];
         }
 
         let compileResult : CompileResult = {
@@ -130,6 +130,7 @@ export let operation1Dict: OperationDict = {
 };
 export let operation2Dict: OperationDict = {
     "f": moveCursorArgWrapper(motion.nextCharOnLine),
+    "F": moveCursorArgWrapper(motion.previousCharOnLine)
 };
 
 export let motion0Dict: Motion0Dict = {

@@ -1,6 +1,5 @@
 import { getSvimEsc } from './config';
 import { operation0Dict, operation1Dict, operation2Dict, motion0Dict, motion1Dict } from './action';
-import { Vim } from './vim';
 
 enum ParseState {
     operation,
