@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { Mode, Vim } from './vim';
 import { NormalResult } from './parser';
 import * as motion from './motion';
-import { parse } from 'path';
 
 interface Operation {
     (editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void;
