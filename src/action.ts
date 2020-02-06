@@ -142,6 +142,12 @@ export let operation0Dict: OperationDict = {
     "s": moveCursorWrapper(motion.startLine),
     "e": moveCursorWrapper(motion.endLine),
     "0": moveCursorWrapper(motion.startLine),
+    "x": (editor, v, range, arg) => {
+        editor.edit(e => {
+            const curPos = editor.selection.active;
+            e.delete(new vscode.Range(curPos, motion.rightChar(curPos)));
+        });
+    }
 };
 export let operation1Dict: OperationDict = {
 
