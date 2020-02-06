@@ -150,11 +150,16 @@ export let operation0Dict: OperationDict = {
     }
 };
 export let operation1Dict: OperationDict = {
-
 };
 export let operation2Dict: OperationDict = {
     "f": moveCursorArgWrapper(motion.nextCharOnLine),
-    "F": moveCursorArgWrapper(motion.previousCharOnLine)
+    "F": moveCursorArgWrapper(motion.previousCharOnLine),
+    "r": (editor, v, range, arg) => {
+        editor.edit(e => {
+            const curPos = editor.selection.active;
+            e.replace(new vscode.Range(curPos, motion.rightChar(curPos)), arg);
+        });
+    }
 };
 
 export let motion0Dict: Motion0Dict = {
