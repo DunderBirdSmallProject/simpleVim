@@ -177,6 +177,7 @@ export let operation2Dict: ActionDict = {
 
 export let motion0Dict: Motion0Dict = {
     "w": motionWrapper(motion.nextWordOnLine),
+    "b": motionRevWrapper(motion.lastWordOnLine),
     "h": motionWrapper(motion.leftChar),
     "j": motionWrapper(motion.downChar),
     "k": motionWrapper(motion.upChar),
