@@ -152,6 +152,18 @@ function endLine(pos: vscode.Position): vscode.Position {
     return pos;
 }
 
+// useful tool
+function wholeLineWithSep(editor: vscode.TextEditor, pos: vscode.Position): vscode.Range {
+    return editor.document.lineAt(pos.line).rangeIncludingLineBreak;
+}
+
+function isLineBegin(pos: vscode.Position): boolean {
+    return pos.character === 0;
+}
+function isLineEnd(pos:vscode.Position): boolean {
+    return pos.character === endLine(pos).character;
+}
 export { leftChar, rightChar, upChar, downChar, downCnt, upCnt,
             nextCharOnLine, previousCharOnLine, nextWordOnLine, lastWordOnLine,
             startLine, endLine };
+export { isLineBegin, isLineEnd, wholeLineWithSep };

@@ -28,6 +28,7 @@ export class Vim
                 case Mode.NORMAL: {
                     const result = this.normalParser.parse(input);
                     if(result) {
+                        vscode.window.showInformationMessage('arg: ' + result.operationStr + ' motion: ' + result.motionStr);
                         const compileResult = compile(result);
                         if(compileResult) {
                             for(let i = 0; i < compileResult.repeat; i++) {

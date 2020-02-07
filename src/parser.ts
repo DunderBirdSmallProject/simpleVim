@@ -38,6 +38,8 @@ function getCharType(c: string, state: ParseState): CharType {
             return CharType.motion1;
         } else if(isN) {
             return CharType.number;
+        } else if(isOp1) {
+            return CharType.operation1;
         }
     } else if(state === ParseState.operation) {
         if(isOp0) {
@@ -143,6 +145,11 @@ export class NormalParser
                         this.state = ParseState.arg;
                         this.motionStr = c[0];
                         break;
+                    }
+                    case CharType.operation1: {
+                        this.motionStr = c[0];
+                        return this._normal_compactReset();
+                        // replicate commands in operation1 means select the whole line
                     }
                     default: {
                         return;

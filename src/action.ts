@@ -50,6 +50,7 @@ function isMotion(opStr: string): boolean {
     return opStr in motion0Dict || opStr in motion1Dict;
 }
 function setInsertMode(editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void {
+    vscode.window.showInformationMessage('set insert mode');
     v.setMode(Mode.INSERT);
 }
 function moveCursorWrapper(motionFunc: Pos2Pos) {
@@ -94,6 +95,11 @@ export function compile(parseResult: NormalResult): CompileResult | undefined {
         };
         
         if(parseResult.motionStr !== "" && isOperation1) {
+            if(parseResult.motionStr === parseResult.operationStr) {
+                // replicate commands in operation1 means select the whole line
+                compileResult.range = motion.wholeLineWithSep(vscode.window.activeTextEditor, curPos);
+                return compileResult;
+            }
             let getPos: (pos: vscode.Position) => vscode.Range;
             if(isMotion(parseResult.motionStr)) {
                 if(parseResult.motionStr in motion0Dict) {
@@ -132,8 +138,8 @@ export let operation0Dict: ActionDict = {
             e.insert(endPos, '\n');
         }).then(() => {
             moveCursorWrapper(motion.downChar)(editor, v, range, arg);
-            setInsertMode(editor, v, range, arg);
         });
+        setInsertMode(editor, v, range, arg);
     },
     "O": (editor, v, range, arg) => {
         editor.edit(e => {
@@ -141,8 +147,8 @@ export let operation0Dict: ActionDict = {
             e.insert(motion.startLine(curPos), '\n');
         }).then(() => {
             moveCursorWrapper(motion.upChar)(editor, v, range, arg);
-            setInsertMode(editor, v, range, arg);
         });
+        setInsertMode(editor, v, range, arg);
     },
     "h": moveCursorWrapper(motion.leftChar),
     "j": moveCursorWrapper(motion.downChar),
