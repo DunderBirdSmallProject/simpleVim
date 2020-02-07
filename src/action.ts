@@ -156,6 +156,7 @@ export let operation0Dict: ActionDict = {
     }
 };
 export let operation1Dict: ActionDict = {
+    "d": opRangeWrapper(operation.deleteRange),
 };
 export let operation2Dict: ActionDict = {
     "f": moveCursorArgWrapper(motion.nextCharOnLine),
