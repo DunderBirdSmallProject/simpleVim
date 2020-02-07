@@ -2,13 +2,14 @@ import * as vscode from 'vscode';
 import { Mode, Vim } from './vim';
 import { NormalResult } from './parser';
 import * as motion from './motion';
+import * as operation from './operation';
 
-interface Operation {
+interface Action {
     (editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void;
 }
 interface CompileResult {
     repeat: number,
-    operation: Operation,
+    operation: Action,
     range: vscode.Range,
     arg: string,
 }
@@ -23,8 +24,8 @@ type Motion0Dict = {
 type Motion1Dict = {
     [c: string]: PosArg2Range;
 };
-type OperationDict = {
-    [c: string]: Operation;
+type ActionDict = {
+    [c: string]: Action;
 };
 
 function motionWrapper(f: Pos2Pos): Pos2Range {
@@ -60,13 +61,18 @@ function moveCursorArgWrapper(motionFunc: PosArg2Pos) {
         editor.selection = new vscode.Selection(nextPos, nextPos);
     };
 }
+function opRangeWrapper(opFunc: operation.Operation): Action {
+    return (editor, v, range, arg) => {
+        return opFunc(editor, range, arg);
+    };
+}
 
 export function compile(parseResult: NormalResult): CompileResult | undefined {
     if(vscode.window.activeTextEditor && isOperation(parseResult.operationStr)) {
         const isOperation1 = parseResult.operationStr in operation1Dict;
         const isOperation0 = parseResult.operationStr in operation0Dict;
         const curPos = vscode.window.activeTextEditor.selection.active;
-        let f: Operation;
+        let f: Action;
         if(isOperation0) {
             f = operation0Dict[parseResult.operationStr];
         } else if(isOperation1) {
@@ -108,7 +114,7 @@ export function compile(parseResult: NormalResult): CompileResult | undefined {
 }
 
 
-export let operation0Dict: OperationDict = {
+export let operation0Dict: ActionDict = {
     "i": setInsertMode,
     "a": (editor, v, range, arg) => {
         moveCursorWrapper(motion.rightChar)(editor, v, range, arg);
@@ -149,9 +155,9 @@ export let operation0Dict: OperationDict = {
         });
     }
 };
-export let operation1Dict: OperationDict = {
+export let operation1Dict: ActionDict = {
 };
-export let operation2Dict: OperationDict = {
+export let operation2Dict: ActionDict = {
     "f": moveCursorArgWrapper(motion.nextCharOnLine),
     "F": moveCursorArgWrapper(motion.previousCharOnLine),
     "r": (editor, v, range, arg) => {
