@@ -43,15 +43,20 @@ function motionArgWrapper(f: PosArg2Pos): PosArg2Range {
         return new vscode.Range(pos, f(pos, c));
     };
 }
-function isOperation(opStr: string): boolean {
+export function isOperation(opStr: string): boolean {
     return opStr in operation0Dict || opStr in operation1Dict || opStr in operation2Dict;
 }
-function isMotion(opStr: string): boolean {
+export function isMotion(opStr: string): boolean {
     return opStr in motion0Dict || opStr in motion1Dict;
 }
 function setInsertMode(editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void {
-    vscode.window.showInformationMessage('set insert mode');
     v.setMode(Mode.INSERT);
+}
+function setVisualModeNotLine(editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void {
+    v.setMode(Mode.VISUAL);
+}
+function setVisualModeLine(editor: vscode.TextEditor, v: Vim, rage: vscode.Range, arg: string): void {
+    v.setMode(Mode.VISUAL, true);
 }
 function moveCursorWrapper(motionFunc: Pos2Pos) {
     return (editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string) => {
@@ -131,6 +136,8 @@ export let operation0Dict: ActionDict = {
         moveCursorWrapper(motion.rightChar)(editor, v, range, arg);
         setInsertMode(editor, v, range, arg);
     },
+    "v": setVisualModeNotLine,
+    "V": setVisualModeLine,
     "o": (editor, v, range, arg) => {
         editor.edit(e => {
             const curPos = editor.selection.active;

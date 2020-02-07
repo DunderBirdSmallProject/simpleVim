@@ -58,15 +58,15 @@ function getCharType(c: string, state: ParseState): CharType {
 export class NormalParser
 {
     /* used for parse commands used in normal mode */
-    private cntOperationStr: string = "";
-    private operationStr: string = "";
-    private cntMotionStr: string = "";
-    private motionStr: string = "";
-    private arg: string = "";
-    private state: ParseState = ParseState.operation;
+    protected cntOperationStr: string = "";
+    protected operationStr: string = "";
+    protected cntMotionStr: string = "";
+    protected motionStr: string = "";
+    protected arg: string = "";
+    protected state: ParseState = ParseState.operation;
 
-    private readOperationCnt: boolean = false;
-    private readMotionCnt: boolean = false;
+    protected readOperationCnt: boolean = false;
+    protected readMotionCnt: boolean = false;
 
     constructor() {
         this.reset();
@@ -95,12 +95,12 @@ export class NormalParser
             arg: this.arg
         };
     }
-    private _normal_compactReset(): NormalResult {
+    public _normal_compactReset(): NormalResult {
         const result = this._normal_compactState();
         this.reset();
         return result;
     }
-    private _normal_parse(c: string): NormalResult | undefined  {
+    public parse(c: string): NormalResult | undefined  {
         const cType = getCharType(c, this.state);
         switch(this.state) {
             case ParseState.operation: {
@@ -163,9 +163,6 @@ export class NormalParser
             }
         }
     }
-    public parse(input: string): NormalResult | undefined {
-        return this._normal_parse(input);
-    }
 };
 
 export class InsertParser
@@ -192,5 +189,50 @@ export class InsertParser
             this.buffer = "";
         }
         return false;
+    }
+}
+
+export class VisualParser extends NormalParser
+{
+    constructor() {
+        super();
+    }
+    public parse(c: string): NormalResult | undefined {
+        const cType = getCharType(c, this.state);
+        switch(this.state) {
+            case ParseState.operation: {
+                switch(cType) {
+                    case CharType.number: {
+                        this.cntMotionStr += c[0];
+                        this.readMotionCnt = true;
+                        break;
+                    }
+                    case CharType.operation0: {
+                        this.operationStr = c[0];
+                        return this._normal_compactReset();
+                    }
+                    case CharType.operation1: {
+                        this.operationStr = c[0];
+                        return this._normal_compactReset();
+                    }
+                    case CharType.operation2: {
+                        this.operationStr = c[0];
+                        this.state = ParseState.arg;
+                        break;
+                    }
+                    default: {
+                        return;
+                    }
+                }
+                break;
+            }
+            case ParseState.arg: {
+                this.arg = c[0];
+                return this._normal_compactReset();
+            }
+            default: {
+                return;
+            }
+        }
     }
 }
