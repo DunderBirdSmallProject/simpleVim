@@ -66,7 +66,7 @@ function downCnt(pos: vscode.Position, cnt: number): vscode.Position {
     if(editor) {
         let nextLineCnt : number;
         let nextCharacter: number;
-        nextLineCnt = Math.min(editor.document.lineCount, pos.line+cnt);
+        nextLineCnt = Math.min(editor.document.lineCount-1, pos.line+cnt);
         nextCharacter = Math.min(pos.character, lineLength(editor, nextLineCnt));
         return new vscode.Position(nextLineCnt, nextCharacter);
     }
@@ -82,6 +82,12 @@ function upCnt(pos: vscode.Position, cnt: number): vscode.Position {
         return new vscode.Position(nextLineCnt, nextCharacter);
     }
     return pos;
+}
+function down20(pos: vscode.Position): vscode.Position {
+    return downCnt(pos, 20);
+}
+function up20(pos: vscode.Position): vscode.Position {
+    return upCnt(pos, 20);
 }
 function nextCharOnLine(pos: vscode.Position, c: string): vscode.Position {
     const editor = vscode.window.activeTextEditor;
@@ -160,5 +166,5 @@ function wholeLineWithSep(editor: vscode.TextEditor, pos: vscode.Position): vsco
 
 export { leftChar, rightChar, upChar, downChar, downCnt, upCnt,
             nextCharOnLine, previousCharOnLine, nextWordOnLine, lastWordOnLine,
-            startLine, endLine };
+            startLine, endLine, down20, up20 };
 export { wholeLineWithSep };

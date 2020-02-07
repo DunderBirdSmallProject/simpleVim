@@ -166,12 +166,14 @@ export let operation0Dict: ActionDict = {
     "s": moveCursorWrapper(motion.startLine),
     "e": moveCursorWrapper(motion.endLine),
     "0": moveCursorWrapper(motion.startLine),
+    "D": moveCursorWrapper(motion.down20),
+    "U": moveCursorWrapper(motion.up20),
     "x": (editor, v, range, arg) => {
         editor.edit(e => {
             const curPos = editor.selection.active;
             e.delete(new vscode.Range(curPos, motion.rightChar(curPos)));
         });
-    }
+    },
 };
 export let operation1Dict: ActionDict = {
     "d": opRangeWrapper(operation.deleteRange),
@@ -196,7 +198,9 @@ export let motion0Dict: Motion0Dict = {
     "k": motionWrapper(motion.upChar),
     "l": motionWrapper(motion.rightChar),
     "e": motionWrapper(motion.endLine),
-    "s": motionRevWrapper(motion.startLine)
+    "s": motionRevWrapper(motion.startLine),
+    "D": motionWrapper(motion.down20),
+    "U": motionWrapper(motion.up20),
 };
 
 export let motion1Dict: Motion1Dict = {
