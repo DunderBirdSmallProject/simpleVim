@@ -14,6 +14,8 @@ export class Vim
     private mode: Mode;
     private normalParser: NormalParser;
     private insertParser: InsertParser;
+
+    private v_line: boolean;
     
     constructor() {
         this.normalParser = new NormalParser();
@@ -68,17 +70,18 @@ export class Vim
         this.insertParser.reset();
         this.normalParser.reset();
     }
-    public setMode(newmode: Mode): void {
-        if(vscode.window.activeTextEditor) {
+    public setMode(newmode: Mode, arg: boolean=false): void {
+        if(vscode.window.activeTextEditor && newmode !== this.mode) {
             if(newmode === Mode.NORMAL) {
                 vscode.window.activeTextEditor.options = {
                     cursorStyle: vscode.TextEditorCursorStyle.Block
                 };
-            }
-            else {
+            } else if(newmode === Mode.INSERT) {
                 vscode.window.activeTextEditor.options = {
                     cursorStyle: vscode.TextEditorCursorStyle.Line
                 };
+            } else if(newmode === Mode.VISUAL) {
+                this.v_line = arg;
             }
             this.mode = newmode;
             this.resetParser();
