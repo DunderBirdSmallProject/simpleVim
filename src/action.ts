@@ -33,6 +33,11 @@ function motionWrapper(f: Pos2Pos): Pos2Range {
         return new vscode.Range(pos, f(pos));
     };
 }
+function motionRevWrapper(f: Pos2Pos): Pos2Range {
+    return pos => {
+        return new vscode.Range(f(pos), pos);
+    };
+}
 function motionArgWrapper(f: PosArg2Pos): PosArg2Range {
     return (pos, c) => {
         return new vscode.Range(pos, f(pos, c));
@@ -175,7 +180,9 @@ export let motion0Dict: Motion0Dict = {
     "h": motionWrapper(motion.leftChar),
     "j": motionWrapper(motion.downChar),
     "k": motionWrapper(motion.upChar),
-    "l": motionWrapper(motion.rightChar)
+    "l": motionWrapper(motion.rightChar),
+    "e": motionWrapper(motion.endLine),
+    "s": motionRevWrapper(motion.startLine)
 };
 
 export let motion1Dict: Motion1Dict = {
