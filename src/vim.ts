@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { NormalParser, InsertParser, VisualParser } from './parser';
-import { compile, operation0Dict, operation1Dict, isOperation, isMotion } from './action';
+import { compile, operation1Dict, runAction } from './action';
 import { getSvimEsc } from './config';
+import { stringify } from 'querystring';
 
 export enum Mode {
     NORMAL,
@@ -80,19 +81,7 @@ export class Vim
                 case Mode.NORMAL: {
                     let result = this.normalParser.parse(input);
                     if(result) {
-                        let compileResult = compile(result);
-                        if(compileResult) {
-                            const repeat = compileResult.repeat;
-                            result.cntOperationStr = "1";
-                            for(let i = 0; i < repeat; i++) {
-                                if(this.mode !== Mode.NORMAL || !compileResult) {
-                                    break;
-                                }
-                                compileResult.operation(editor, this,
-                                                        compileResult.range, compileResult.arg);
-                                compileResult = compile(result);
-                            }
-                        }
+                        runAction(result, editor, this);
                     }
                     break;
                 }
@@ -119,9 +108,9 @@ export class Vim
                         if(compileResult) {
                             if(result.operationStr in operation1Dict) {
                                 compileResult.range = new vscode.Range(editor.selection.start, editor.selection.end);
+                                compileResult.repeat = 1;
                             }
-                            compileResult.operation(editor, this,
-                                                    compileResult.range, compileResult.arg);
+                            runAction(result, editor, this);
                         }
                     }
                     break;

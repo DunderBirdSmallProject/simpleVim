@@ -4,10 +4,14 @@ import { NormalResult } from './parser';
 import * as motion from './motion';
 import * as operation from './operation';
 
-// TODO: use promise to refactor
-
+interface ActionArg {
+    editor: vscode.TextEditor,
+    v: Vim,
+    range: vscode.Range,
+    arg: string
+}
 interface Action {
-    (editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void;
+    (acArg: ActionArg): Thenable<ActionArg>;
 }
 interface CompileResult {
     repeat: number,
@@ -46,45 +50,52 @@ export function isOperation(opStr: string): boolean {
 export function isMotion(opStr: string): boolean {
     return opStr in motion0Dict || opStr in motion1Dict;
 }
-function setInsertMode(editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void {
-    v.resumeNormal(editor);
-    v.setMode(Mode.INSERT);
+async function setInsertMode(acArg: ActionArg): Promise<ActionArg> {
+    acArg.v.resumeNormal(acArg.editor);
+    acArg.v.setMode(Mode.INSERT);
+    return acArg;
 }
-function setVisualModeNotLine(editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void {
-    v.setMode(Mode.VISUAL);
+async function setVisualModeNotLine(acArg: ActionArg): Promise<ActionArg> {
+    acArg.v.setMode(Mode.VISUAL);
+    return acArg;
 }
-function setVisualModeLine(editor: vscode.TextEditor, v: Vim, rage: vscode.Range, arg: string): void {
-    v.setMode(Mode.VISUAL, true);
+async function setVisualModeLine(acArg: ActionArg): Promise<ActionArg> {
+    acArg.v.setMode(Mode.VISUAL, true);
+    return acArg;
 }
 function moveCursorWrapper(motionFunc: Pos2Pos) {
-    return (editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string) => {
-        const curPos = editor.selection.active;
+    return async (acArg: ActionArg) => {
+        const curPos = acArg.editor.selection.active;
         const nextPos = motionFunc(curPos);
-        v.noticeMove(editor, nextPos);
+        acArg.v.noticeMove(acArg.editor, nextPos);
         //editor.selection = new vscode.Selection(nextPos, nextPos);
-        editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
+        acArg.editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
+        return acArg;
     };
 }
 function moveCursorArgWrapper(motionFunc: PosArg2Pos) {
-    return (editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string) => {
-        const curPos = editor.selection.active;
-        const nextPos = motionFunc(curPos, arg);
-        v.noticeMove(editor, nextPos);
+    return async (acArg: ActionArg) => {
+        const curPos = acArg.editor.selection.active;
+        const nextPos = motionFunc(curPos, acArg.arg);
+        acArg.v.noticeMove(acArg.editor, nextPos);
         //editor.selection = new vscode.Selection(nextPos, nextPos);
-        editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
+        acArg.editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
+        return acArg;
     };
 }
 function opActionWrapper(acFunc: Action): Action {
     // to resume in the visual mode
-    return (editor, v, range, arg) => {
-        acFunc(editor, v, range, arg);
-        v.resumeNormal(editor);
+    return async (acArg) => {
+        await acFunc(acArg);
+        acArg.v.resumeNormal(acArg.editor);
+        return acArg;
     };
 }
 function opRangeWrapper(opFunc: operation.Operation): Action {
-    return (editor, v, range, arg) => {
-        opFunc(editor, range, arg);
-        v.resumeNormal(editor);
+    return async (acArg) => {
+        await opFunc(acArg.editor, acArg.range, acArg.arg);
+        acArg.v.resumeNormal(acArg.editor);
+        return acArg;
     };
 }
 
@@ -139,33 +150,55 @@ export function compile(parseResult: NormalResult): CompileResult | undefined {
     }
 }
 
+export async function runAction(parseResult: NormalResult, editor: vscode.TextEditor, v: Vim) {
+    let compileResult = compile(parseResult);
+    if(compileResult) {
+        const repeat = compileResult.repeat;
+        for(let i = 0; i < repeat; i++) {
+            if(!compileResult) {
+                break;
+            }
+            await compileResult.operation({
+                editor: editor,
+                v: v,
+                range: compileResult.range,
+                arg: compileResult.arg
+            });
+            compileResult = compile(parseResult);
+        }
+    }
+}
+
 
 export let operation0Dict: ActionDict = {
     "i": setInsertMode,
-    "a": opActionWrapper((editor, v, range, arg) => {
-        moveCursorWrapper(motion.rightChar)(editor, v, range, arg);
-        setInsertMode(editor, v, range, arg);
+    "a": opActionWrapper(async (acArg: ActionArg) => {
+        await moveCursorWrapper(motion.rightChar)(acArg);
+        await setInsertMode(acArg);
+        return acArg;
     }),
     "v": setVisualModeNotLine,
     "V": setVisualModeLine,
-    "o": opActionWrapper((editor, v, range, arg) => {
-        editor.edit(e => {
-            const curPos = editor.selection.active;
+    "o": opActionWrapper(async (acArg: ActionArg) => {
+        await acArg.editor.edit(e => {
+            const curPos = acArg.editor.selection.active;
             const endPos = motion.endLine(curPos);
             e.insert(endPos, '\n');
         }).then(() => {
-            moveCursorWrapper(motion.downChar)(editor, v, range, arg);
+            moveCursorWrapper(motion.downChar)(acArg);
         });
-        setInsertMode(editor, v, range, arg);
+        await setInsertMode(acArg);
+        return acArg;
     }),
-    "O": opActionWrapper((editor, v, range, arg) => {
-        editor.edit(e => {
-            const curPos = editor.selection.active;
+    "O": opActionWrapper(async (acArg: ActionArg) => {
+        await acArg.editor.edit(e => {
+            const curPos = acArg.editor.selection.active;
             e.insert(motion.startLine(curPos), '\n');
         }).then(() => {
-            moveCursorWrapper(motion.upChar)(editor, v, range, arg);
+            moveCursorWrapper(motion.upChar)(acArg);
         });
-        setInsertMode(editor, v, range, arg);
+        setInsertMode(acArg);
+        return acArg;
     }),
     "h": moveCursorWrapper(motion.leftChar),
     "j": moveCursorWrapper(motion.downChar),
@@ -175,14 +208,14 @@ export let operation0Dict: ActionDict = {
     "b": moveCursorWrapper(motion.lastWordOnLine),
     "s": moveCursorWrapper(motion.startLine),
     "e": moveCursorWrapper(motion.endLine),
-    "0": moveCursorWrapper(motion.startLine),
     "D": moveCursorWrapper(motion.down20),
     "U": moveCursorWrapper(motion.up20),
-    "x": (editor, v, range, arg) => {
-        editor.edit(e => {
-            const curPos = editor.selection.active;
+    "x": async (acArg: ActionArg) => {
+        await acArg.editor.edit(e => {
+            const curPos = acArg.editor.selection.active;
             e.delete(new vscode.Range(curPos, motion.rightChar(curPos)));
         });
+        return acArg;
     },
 };
 export let operation1Dict: ActionDict = {
@@ -192,11 +225,12 @@ export let operation1Dict: ActionDict = {
 export let operation2Dict: ActionDict = {
     "f": moveCursorArgWrapper(motion.nextCharOnLine),
     "F": moveCursorArgWrapper(motion.previousCharOnLine),
-    "r": (editor, v, range, arg) => {
-        editor.edit(e => {
-            const curPos = editor.selection.active;
-            e.replace(new vscode.Range(curPos, motion.rightChar(curPos)), arg);
+    "r": async (acArg: ActionArg) => {
+        await acArg.editor.edit(e => {
+            const curPos = acArg.editor.selection.active;
+            e.replace(new vscode.Range(curPos, motion.rightChar(curPos)), acArg.arg);
         });
+        return acArg;
     }
 };
 

@@ -30,7 +30,7 @@ function getCharType(c: string, state: ParseState): CharType {
     const isOp0 = c in operation0Dict;
     const isOp1 = c in operation1Dict;
     const isOp2 = c in operation2Dict;
-    const isN = "123456789".indexOf(c) !== -1;
+    const isN = "1234567890".indexOf(c) !== -1;
     if(state === ParseState.motion) {
         if(isM0) {
             return CharType.motion0;
@@ -203,8 +203,8 @@ export class VisualParser extends NormalParser
             case ParseState.operation: {
                 switch(cType) {
                     case CharType.number: {
-                        this.cntMotionStr += c[0];
-                        this.readMotionCnt = true;
+                        this.cntOperationStr += c[0];
+                        this.readOperationCnt = true;
                         break;
                     }
                     case CharType.operation0: {

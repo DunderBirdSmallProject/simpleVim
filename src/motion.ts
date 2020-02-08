@@ -16,12 +16,6 @@ function lineLength(editor: vscode.TextEditor, cnt: number): number {
 function currentLineLength(editor: vscode.TextEditor, pos: vscode.Position): number {
     return currentLine(editor, pos).text.length;
 }
-function currentLineBegin(editor: vscode.TextEditor, pos: vscode.Position): vscode.Position {
-    return currentLine(editor, pos).range.start;
-}
-function currentLineEnd(editor: vscode.TextEditor, pos: vscode.Position): vscode.Position {
-    return currentLine(editor, pos).range.end;
-}
 
 // note that the end of Line is not the position of the last character
 // but the next of that.
