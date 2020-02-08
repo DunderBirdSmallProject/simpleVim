@@ -19,6 +19,12 @@ export function activate(context: vscode.ExtensionContext) {
         }
         sVim.setMode(Mode.NORMAL);
     });
+    registerCommand('extension.svim_toggle', function() {
+        if(!vscode.window.activeTextEditor) {
+            return;
+        }
+        sVim.setMode(Mode.NORMAL);
+    });
 }
 
 export function deactivate() {}

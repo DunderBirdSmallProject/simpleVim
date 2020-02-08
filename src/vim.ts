@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { NormalParser, InsertParser, VisualParser } from './parser';
 import { compile, operation1Dict, runAction } from './action';
 import { getSvimEsc } from './config';
-import { stringify } from 'querystring';
 
 export enum Mode {
     NORMAL,
@@ -26,8 +25,13 @@ export class Vim
         this.visualParser = new VisualParser();
         this.mode = Mode.NORMAL;
         this.v_line = false;
+        vscode.window.onDidChangeActiveTextEditor((textEditor) => {
+            if(!textEditor) {
+                return;
+            }
+            this.setMode(Mode.NORMAL);
+        });
     }
-
     public resumeNormal(editor: vscode.TextEditor) {
         switch(this.mode) {
             case Mode.VISUAL: {
@@ -41,7 +45,6 @@ export class Vim
             }
         }
     }
-
     public noticeMove(editor: vscode.TextEditor, pos: vscode.Position) {
         switch(this.mode) {
             case Mode.INSERT:
@@ -73,7 +76,6 @@ export class Vim
             }
         }
     }
-
     public getInput(input: string): void {
         const editor = vscode.window.activeTextEditor;
         if(editor) {
