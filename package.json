@@ -16,10 +16,17 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
+				"command": "extension.svim_toggle",
+				"title": "svim start"
 			}
-		]
+        ],
+        "keybindings": [
+            {
+                "key": "Escape",
+                "command": "extension.svim_escape",
+                "when": "editorTextFocus"
+            }
+        ]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

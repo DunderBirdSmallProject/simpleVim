@@ -13,6 +13,12 @@ export function activate(context: vscode.ExtensionContext) {
         }
         sVim.getInput(args.text);
     });
+    registerCommand('extension.svim_escape', function() {
+        if(!vscode.window.activeTextEditor) {
+            return;
+        }
+        sVim.setMode(Mode.NORMAL);
+    });
 }
 
 export function deactivate() {}

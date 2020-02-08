@@ -132,6 +132,9 @@ export class Vim
         if(vscode.window.activeTextEditor) {
             const editor = vscode.window.activeTextEditor;
             if(newmode === Mode.NORMAL) {
+                if(this.mode === Mode.VISUAL) {
+                    editor.selection = new vscode.Selection(editor.selection.anchor, editor.selection.anchor);
+                }
                 vscode.window.activeTextEditor.options = {
                     cursorStyle: vscode.TextEditorCursorStyle.Block
                 };
