@@ -27,6 +27,52 @@ export class Vim
         this.v_line = false;
     }
 
+    public resumeNormal(editor: vscode.TextEditor) {
+        switch(this.mode) {
+            case Mode.VISUAL: {
+                const curPos = editor.selection.active;
+                editor.selection = new vscode.Selection(curPos, curPos);
+                this.setMode(Mode.NORMAL);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    public noticeMove(editor: vscode.TextEditor, pos: vscode.Position) {
+        switch(this.mode) {
+            case Mode.INSERT:
+            case Mode.NORMAL: {
+                editor.selection = new vscode.Selection(pos, pos);
+                break;
+            }
+            case Mode.VISUAL: {
+                if(this.v_pos) {
+                    if(this.v_line) {
+                        const currentLine = editor.document.lineAt(pos);
+                        let nextEnd : vscode.Position;
+                        if(pos.line < this.v_pos.line) {
+                            this.v_pos = editor.document.lineAt(this.v_pos.line).range.end;
+                            nextEnd = currentLine.range.start;
+                        } else {
+                            this.v_pos = editor.document.lineAt(this.v_pos.line).range.start;
+                            nextEnd = currentLine.range.end;
+                        }
+                        editor.selection = new vscode.Selection(this.v_pos, nextEnd);
+                    } else {
+                        editor.selection = new vscode.Selection(this.v_pos, pos);
+                    }
+                }
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
     public getInput(input: string): void {
         const editor = vscode.window.activeTextEditor;
         if(editor) {
@@ -73,34 +119,6 @@ export class Vim
                             }
                             compileResult.operation(editor, this,
                                                     compileResult.range, compileResult.arg);
-                            if(isOperation(result.operationStr) && !isMotion(result.operationStr)) {
-                                this.setMode(Mode.NORMAL);
-                                editor.selection = new vscode.Selection(editor.selection.start, editor.selection.start);
-                            } else {
-                                if(!this.v_pos) {
-                                    if(this.v_line) {
-                                        this.v_pos = new vscode.Position(editor.selection.active.line, 0);
-                                    } else {
-                                        this.v_pos = editor.selection.active;
-                                    }
-                                }
-                               
-                                // vscode.Selection will guarantee that start is before or equal to end
-                                if(this.v_line) {
-                                    const currentLine = editor.document.lineAt(editor.selection.active);
-                                    let nextEnd : vscode.Position;
-                                    if(editor.selection.active.line < this.v_pos.line) {
-                                        this.v_pos = editor.document.lineAt(this.v_pos.line).range.end;
-                                        nextEnd = currentLine.range.start;
-                                    } else {
-                                        this.v_pos = editor.document.lineAt(this.v_pos.line).range.start;
-                                        nextEnd = currentLine.range.end;
-                                    }
-                                    editor.selection = new vscode.Selection(this.v_pos, nextEnd);
-                                } else {
-                                    editor.selection = new vscode.Selection(this.v_pos, editor.selection.active);
-                                }
-                            }
                         }
                     }
                     break;

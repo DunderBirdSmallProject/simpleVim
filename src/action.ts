@@ -45,6 +45,7 @@ export function isMotion(opStr: string): boolean {
     return opStr in motion0Dict || opStr in motion1Dict;
 }
 function setInsertMode(editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void {
+    v.resumeNormal(editor);
     v.setMode(Mode.INSERT);
 }
 function setVisualModeNotLine(editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void {
@@ -57,7 +58,8 @@ function moveCursorWrapper(motionFunc: Pos2Pos) {
     return (editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string) => {
         const curPos = editor.selection.active;
         const nextPos = motionFunc(curPos);
-        editor.selection = new vscode.Selection(nextPos, nextPos);
+        v.noticeMove(editor, nextPos);
+        //editor.selection = new vscode.Selection(nextPos, nextPos);
         editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
     };
 }
@@ -65,13 +67,22 @@ function moveCursorArgWrapper(motionFunc: PosArg2Pos) {
     return (editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string) => {
         const curPos = editor.selection.active;
         const nextPos = motionFunc(curPos, arg);
-        editor.selection = new vscode.Selection(nextPos, nextPos);
+        v.noticeMove(editor, nextPos);
+        //editor.selection = new vscode.Selection(nextPos, nextPos);
         editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
+    };
+}
+function opActionWrapper(acFunc: Action): Action {
+    // to resume in the visual mode
+    return (editor, v, range, arg) => {
+        acFunc(editor, v, range, arg);
+        v.resumeNormal(editor);
     };
 }
 function opRangeWrapper(opFunc: operation.Operation): Action {
     return (editor, v, range, arg) => {
-        return opFunc(editor, range, arg);
+        opFunc(editor, range, arg);
+        v.resumeNormal(editor);
     };
 }
 
@@ -129,13 +140,13 @@ export function compile(parseResult: NormalResult): CompileResult | undefined {
 
 export let operation0Dict: ActionDict = {
     "i": setInsertMode,
-    "a": (editor, v, range, arg) => {
+    "a": opActionWrapper((editor, v, range, arg) => {
         moveCursorWrapper(motion.rightChar)(editor, v, range, arg);
         setInsertMode(editor, v, range, arg);
-    },
+    }),
     "v": setVisualModeNotLine,
     "V": setVisualModeLine,
-    "o": (editor, v, range, arg) => {
+    "o": opActionWrapper((editor, v, range, arg) => {
         editor.edit(e => {
             const curPos = editor.selection.active;
             const endPos = motion.endLine(curPos);
@@ -144,8 +155,8 @@ export let operation0Dict: ActionDict = {
             moveCursorWrapper(motion.downChar)(editor, v, range, arg);
         });
         setInsertMode(editor, v, range, arg);
-    },
-    "O": (editor, v, range, arg) => {
+    }),
+    "O": opActionWrapper((editor, v, range, arg) => {
         editor.edit(e => {
             const curPos = editor.selection.active;
             e.insert(motion.startLine(curPos), '\n');
@@ -153,7 +164,7 @@ export let operation0Dict: ActionDict = {
             moveCursorWrapper(motion.upChar)(editor, v, range, arg);
         });
         setInsertMode(editor, v, range, arg);
-    },
+    }),
     "h": moveCursorWrapper(motion.leftChar),
     "j": moveCursorWrapper(motion.downChar),
     "k": moveCursorWrapper(motion.upChar),
