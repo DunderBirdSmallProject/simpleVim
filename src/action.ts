@@ -33,11 +33,6 @@ function motionWrapper(f: Pos2Pos): Pos2Range {
         return new vscode.Range(pos, f(pos));
     };
 }
-function motionRevWrapper(f: Pos2Pos): Pos2Range {
-    return pos => {
-        return new vscode.Range(f(pos), pos);
-    };
-}
 function motionArgWrapper(f: PosArg2Pos): PosArg2Range {
     return (pos, c) => {
         return new vscode.Range(pos, f(pos, c));
@@ -63,6 +58,7 @@ function moveCursorWrapper(motionFunc: Pos2Pos) {
         const curPos = editor.selection.active;
         const nextPos = motionFunc(curPos);
         editor.selection = new vscode.Selection(nextPos, nextPos);
+        editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
     };
 }
 function moveCursorArgWrapper(motionFunc: PosArg2Pos) {
@@ -70,6 +66,7 @@ function moveCursorArgWrapper(motionFunc: PosArg2Pos) {
         const curPos = editor.selection.active;
         const nextPos = motionFunc(curPos, arg);
         editor.selection = new vscode.Selection(nextPos, nextPos);
+        editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
     };
 }
 function opRangeWrapper(opFunc: operation.Operation): Action {
@@ -192,13 +189,13 @@ export let operation2Dict: ActionDict = {
 
 export let motion0Dict: Motion0Dict = {
     "w": motionWrapper(motion.nextWordOnLine),
-    "b": motionRevWrapper(motion.lastWordOnLine),
+    "b": motionWrapper(motion.lastWordOnLine),
     "h": motionWrapper(motion.leftChar),
     "j": motionWrapper(motion.downChar),
     "k": motionWrapper(motion.upChar),
     "l": motionWrapper(motion.rightChar),
     "e": motionWrapper(motion.endLine),
-    "s": motionRevWrapper(motion.startLine),
+    "s": motionWrapper(motion.startLine),
     "D": motionWrapper(motion.down20),
     "U": motionWrapper(motion.up20),
 };
