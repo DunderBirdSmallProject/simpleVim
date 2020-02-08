@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { NormalParser, InsertParser, VisualParser } from './parser';
-import { compile, operation1Dict, runAction } from './action';
+import { runAction } from './interpret';
 import { getSvimEsc } from './config';
 
 export enum Mode {
@@ -106,14 +106,7 @@ export class Vim
                 case Mode.VISUAL: {
                     const result = this.visualParser.parse(input);
                     if(result) {
-                        let compileResult = compile(result);
-                        if(compileResult) {
-                            if(result.operationStr in operation1Dict) {
-                                compileResult.range = new vscode.Range(editor.selection.start, editor.selection.end);
-                                compileResult.repeat = 1;
-                            }
-                            runAction(result, editor, this);
-                        }
+                        runAction(result, editor, this);
                     }
                     break;
                 }
