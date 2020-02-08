@@ -231,6 +231,32 @@ export let operation2Dict: ActionDict = {
             e.replace(new vscode.Range(curPos, motion.rightChar(curPos)), acArg.arg);
         });
         return acArg;
+    },
+    "z": async (acArg: ActionArg) => {
+        let lineNumber = acArg.editor.selection.active.line;
+        let at: string;
+        switch(acArg.arg) {
+            case 'z': {
+                at = 'center';
+                break;
+            }
+            case 't': {
+                at = 'top';
+                break;
+            }
+            case 'b': {
+                at = 'bottom';
+                break;
+            }
+            default: {
+                return acArg;
+            }
+        }
+        await vscode.commands.executeCommand('revealLine', {
+            lineNumber: lineNumber,
+            at: at
+        });
+        return acArg;
     }
 };
 

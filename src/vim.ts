@@ -153,4 +153,7 @@ export class Vim
             this.resetParser();
         }
     }
+    public getMode(): Mode {
+        return this.mode;
+    }
 };
