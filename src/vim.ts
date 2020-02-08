@@ -78,10 +78,28 @@ export class Vim
                                 editor.selection = new vscode.Selection(editor.selection.start, editor.selection.start);
                             } else {
                                 if(!this.v_pos) {
-                                    this.v_pos = editor.selection.start;
+                                    if(this.v_line) {
+                                        this.v_pos = new vscode.Position(editor.selection.active.line, 0);
+                                    } else {
+                                        this.v_pos = editor.selection.active;
+                                    }
                                 }
+                               
                                 // vscode.Selection will guarantee that start is before or equal to end
-                                editor.selection = new vscode.Selection(this.v_pos, editor.selection.end);
+                                if(this.v_line) {
+                                    const currentLine = editor.document.lineAt(editor.selection.active);
+                                    let nextEnd : vscode.Position;
+                                    if(editor.selection.active.line < this.v_pos.line) {
+                                        this.v_pos = editor.document.lineAt(this.v_pos.line).range.end;
+                                        nextEnd = currentLine.range.start;
+                                    } else {
+                                        this.v_pos = editor.document.lineAt(this.v_pos.line).range.start;
+                                        nextEnd = currentLine.range.end;
+                                    }
+                                    editor.selection = new vscode.Selection(this.v_pos, nextEnd);
+                                } else {
+                                    editor.selection = new vscode.Selection(this.v_pos, editor.selection.active);
+                                }
                             }
                         }
                     }
@@ -102,6 +120,7 @@ export class Vim
         this.v_pos = undefined;
         this.v_line = false;
         if(vscode.window.activeTextEditor) {
+            const editor = vscode.window.activeTextEditor;
             if(newmode === Mode.NORMAL) {
                 vscode.window.activeTextEditor.options = {
                     cursorStyle: vscode.TextEditorCursorStyle.Block
@@ -112,7 +131,13 @@ export class Vim
                 };
             } else if(newmode === Mode.VISUAL) {
                 this.v_line = arg;
-                this.v_pos = vscode.window.activeTextEditor.selection.start;
+                if(this.v_line) {
+                    const currentLine = editor.document.lineAt(editor.selection.active.line);
+                    this.v_pos = currentLine.range.start;
+                    editor.selection = new vscode.Selection(currentLine.range.start, currentLine.range.end);
+                } else {
+                    this.v_pos = vscode.window.activeTextEditor.selection.active;
+                }
             }
             this.mode = newmode;
             this.resetParser();
