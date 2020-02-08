@@ -94,7 +94,6 @@ function opActionWrapper(acFunc: Action): Action {
 function opRangeWrapper(opFunc: operation.Operation): Action {
     return async (acArg) => {
         await opFunc(acArg.editor, acArg.range, acArg.arg);
-        acArg.v.resumeNormal(acArg.editor);
         return acArg;
     };
 }
@@ -219,8 +218,10 @@ export let operation0Dict: ActionDict = {
     },
 };
 export let operation1Dict: ActionDict = {
-    "d": opRangeWrapper(operation.deleteRange),
-    "y": opRangeWrapper(operation.copyRange),
+    "d": opActionWrapper(opRangeWrapper(operation.deleteRange)),
+    "y": opActionWrapper(opRangeWrapper(operation.copyRange)),
+    ">": opRangeWrapper(operation.indentRange),
+    "<": opRangeWrapper(operation.reIndentRange)
 };
 export let operation2Dict: ActionDict = {
     "f": moveCursorArgWrapper(motion.nextCharOnLine),
