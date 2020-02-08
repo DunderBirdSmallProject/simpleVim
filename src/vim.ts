@@ -78,16 +78,19 @@ export class Vim
         if(editor) {
             switch(this.mode) {
                 case Mode.NORMAL: {
-                    const result = this.normalParser.parse(input);
+                    let result = this.normalParser.parse(input);
                     if(result) {
-                        const compileResult = compile(result);
+                        let compileResult = compile(result);
                         if(compileResult) {
-                            for(let i = 0; i < compileResult.repeat; i++) {
-                                if(this.mode !== Mode.NORMAL) {
+                            const repeat = compileResult.repeat;
+                            result.cntOperationStr = "1";
+                            for(let i = 0; i < repeat; i++) {
+                                if(this.mode !== Mode.NORMAL || !compileResult) {
                                     break;
                                 }
                                 compileResult.operation(editor, this,
                                                         compileResult.range, compileResult.arg);
+                                compileResult = compile(result);
                             }
                         }
                     }

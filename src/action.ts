@@ -4,6 +4,8 @@ import { NormalResult } from './parser';
 import * as motion from './motion';
 import * as operation from './operation';
 
+// TODO: use promise to refactor
+
 interface Action {
     (editor: vscode.TextEditor, v: Vim, range: vscode.Range, arg: string): void;
 }
