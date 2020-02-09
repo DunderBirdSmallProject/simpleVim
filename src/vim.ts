@@ -21,6 +21,8 @@ export class Vim
 
     private lastNormalCmd: NormalResult | undefined;
     private lastVisualCmd: NormalResult | undefined;
+
+    private normalReg: string | undefined;
     
     constructor() {
         this.normalParser = new NormalParser();
@@ -30,6 +32,7 @@ export class Vim
         this.v_line = false;
         this.lastNormalCmd = undefined;
         this.lastVisualCmd = undefined;
+        this.normalReg = undefined;
         vscode.window.onDidChangeActiveTextEditor((textEditor) => {
             if(!textEditor) {
                 return;
@@ -165,11 +168,20 @@ export class Vim
     public getMode(): Mode {
         return this.mode;
     }
+    public getVisualLine(): boolean {
+        return this.v_line;
+    }
     public getLastCmd(): NormalResult | undefined {
         if(this.mode === Mode.NORMAL) {
             return this.lastNormalCmd;
         } else if(this.mode === Mode.VISUAL) {
             return this.lastVisualCmd;
         }
+    }
+    public copyReg(newstr: string) {
+        this.normalReg = newstr;
+    }
+    public getReg(): string | undefined {
+        return this.normalReg;
     }
 };

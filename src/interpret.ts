@@ -10,6 +10,7 @@ interface CompileResult {
     operation: Action,
     range: vscode.Range,
     arg: string,
+    lineOp?: boolean
 }
 
 function compile(parseResult: NormalResult): CompileResult | undefined {
@@ -49,6 +50,7 @@ function compile(parseResult: NormalResult): CompileResult | undefined {
             if(parseResult.motionStr === parseResult.operationStr) {
                 // replicate commands in operation1 means select the whole line
                 compileResult.range = motion.wholeLineWithSep(editor, curPos);
+                compileResult.lineOp = true;
                 return compileResult;
             }
             let getPos: (pos: vscode.Position) => vscode.Range;
@@ -80,6 +82,9 @@ export async function runAction(parseResult: NormalResult, editor: vscode.TextEd
     if(compileResult) {
         if(parseResult.operationStr in operation1Dict && v.getMode() === Mode.VISUAL) {
             compileResult.range = new vscode.Range(editor.selection.start, editor.selection.end);
+            if(v.getVisualLine()) {
+                compileResult.lineOp = true;
+            }
             compileResult.repeat = 1;
         }
         const repeat = compileResult.repeat;
@@ -91,7 +96,8 @@ export async function runAction(parseResult: NormalResult, editor: vscode.TextEd
                 editor: editor,
                 v: v,
                 range: compileResult.range,
-                arg: compileResult.arg
+                arg: compileResult.arg,
+                lineOp: compileResult.lineOp
             });
             compileResult = compile(parseResult);
         }

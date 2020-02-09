@@ -8,7 +8,8 @@ export interface ActionArg {
     editor: vscode.TextEditor,
     v: Vim,
     range: vscode.Range,
-    arg: string
+    arg: string,
+    lineOp?: boolean
 }
 export interface Action {
     (acArg: ActionArg): Thenable<ActionArg>;
@@ -57,6 +58,29 @@ async function setVisualModeLine(acArg: ActionArg): Promise<ActionArg> {
     acArg.v.setMode(Mode.VISUAL, true);
     return acArg;
 }
+async function enterNewLine(acArg: ActionArg, direct: boolean): Promise<ActionArg> {
+    // direct: true: down false: up
+    let nextLineEnd : vscode.Position;
+    const curLine = acArg.editor.selection.active.line;
+    if(direct) {
+        await acArg.editor.edit(e => {
+            const curPos = acArg.editor.selection.active;
+            const endPos = motion.endLine(curPos);
+            e.insert(endPos, '\n');
+        });
+        nextLineEnd = acArg.editor.document.lineAt(curLine+1).range.end;
+    } else {
+        await acArg.editor.edit(e => {
+            const curPos = acArg.editor.selection.active;
+            e.insert(motion.startLine(curPos), '\n');
+        });
+        nextLineEnd = acArg.editor.document.lineAt(curLine).range.end;
+    }
+    // move the cursor
+    acArg.v.noticeMove(acArg.editor, nextLineEnd);
+    acArg.editor.revealRange(new vscode.Range(motion.startLine(nextLineEnd), motion.endLine(nextLineEnd)));
+    return acArg;
+}
 function moveCursorWrapper(motionFunc: Pos2Pos) {
     return async (acArg: ActionArg) => {
         const curPos = acArg.editor.selection.active;
@@ -87,7 +111,7 @@ function opActionWrapper(acFunc: Action): Action {
 }
 function opRangeWrapper(opFunc: operation.Operation): Action {
     return async (acArg) => {
-        await opFunc(acArg.editor, acArg.range, acArg.arg);
+        await opFunc(acArg);
         return acArg;
     };
 }
@@ -102,24 +126,39 @@ export let operation0Dict: ActionDict = {
     "v": setVisualModeNotLine,
     "V": setVisualModeLine,
     "o": opActionWrapper(async (acArg: ActionArg) => {
-        await acArg.editor.edit(e => {
-            const curPos = acArg.editor.selection.active;
-            const endPos = motion.endLine(curPos);
-            e.insert(endPos, '\n');
-        }).then(() => {
-            moveCursorWrapper(motion.downChar)(acArg);
-        });
+        await enterNewLine(acArg, true);
         await setInsertMode(acArg);
         return acArg;
     }),
     "O": opActionWrapper(async (acArg: ActionArg) => {
-        await acArg.editor.edit(e => {
-            const curPos = acArg.editor.selection.active;
-            e.insert(motion.startLine(curPos), '\n');
-        }).then(() => {
-            moveCursorWrapper(motion.upChar)(acArg);
-        });
-        setInsertMode(acArg);
+        await enterNewLine(acArg, false);
+        await setInsertMode(acArg);
+        return acArg;
+    }),
+    "p": opActionWrapper(async (acArg: ActionArg) => {
+        let toInsert = acArg.v.getReg();
+        if(toInsert && toInsert !== '^$') {
+            if(toInsert.indexOf('^$') === 0) {
+                toInsert = toInsert.slice(2);
+                await enterNewLine(acArg, true);
+            }
+            await acArg.editor.edit((e) => {
+                e.insert(acArg.editor.selection.active, <string>toInsert);
+            });
+        }
+        return acArg;
+    }),
+    "P": opActionWrapper(async (acArg: ActionArg) => {
+        let toInsert = acArg.v.getReg();
+        if(toInsert && toInsert !== '^$') {
+            if(toInsert.indexOf('^$') === 0) {
+                toInsert = toInsert.slice(2);
+                await enterNewLine(acArg, false);
+            }
+            await acArg.editor.edit((e) => {
+                e.insert(acArg.editor.selection.active, <string>toInsert);
+            });
+        }
         return acArg;
     }),
     "h": moveCursorWrapper(motion.leftChar),
