@@ -58,8 +58,13 @@ async function setVisualModeLine(acArg: ActionArg): Promise<ActionArg> {
     acArg.v.setMode(Mode.VISUAL, true);
     return acArg;
 }
+/**
+ * enter a new line above or below and move the cursor to the end of that line
+ * @param acArg Action arguments
+ * @param direct true: down false: up
+ * @return Promise<ActionArg>
+ */
 async function enterNewLine(acArg: ActionArg, direct: boolean): Promise<ActionArg> {
-    // direct: true: down false: up
     let nextLineEnd : vscode.Position;
     const curLine = acArg.editor.selection.active.line;
     if(direct) {
@@ -101,8 +106,11 @@ function moveCursorArgWrapper(motionFunc: PosArg2Pos) {
         return acArg;
     };
 }
+/**
+ * switch to normal mode when vim is in visual mode
+ * @param acFunc Action argument
+ */
 function opActionWrapper(acFunc: Action): Action {
-    // to resume in the visual mode
     return async (acArg) => {
         await acFunc(acArg);
         acArg.v.resumeNormal(acArg.editor);
@@ -133,6 +141,10 @@ export let operation0Dict: ActionDict = {
     "O": opActionWrapper(async (acArg: ActionArg) => {
         await enterNewLine(acArg, false);
         await setInsertMode(acArg);
+        return acArg;
+    }),
+    "u": opActionWrapper(async (acArg: ActionArg) => {
+        await vscode.commands.executeCommand('undo');
         return acArg;
     }),
     "p": opActionWrapper(async (acArg: ActionArg) => {
