@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { NormalParser, InsertParser, VisualParser } from './parser';
+import { NormalParser, InsertParser, VisualParser, NormalResult } from './parser';
 import { runAction } from './interpret';
 import { getSvimEsc } from './config';
 
@@ -18,6 +18,9 @@ export class Vim
 
     private v_line: boolean;
     private v_pos: vscode.Position | undefined;
+
+    private lastNormalCmd: NormalResult | undefined;
+    private lastVisualCmd: NormalResult | undefined;
     
     constructor() {
         this.normalParser = new NormalParser();
@@ -25,6 +28,8 @@ export class Vim
         this.visualParser = new VisualParser();
         this.mode = Mode.NORMAL;
         this.v_line = false;
+        this.lastNormalCmd = undefined;
+        this.lastVisualCmd = undefined;
         vscode.window.onDidChangeActiveTextEditor((textEditor) => {
             if(!textEditor) {
                 return;
@@ -84,6 +89,9 @@ export class Vim
                     let result = this.normalParser.parse(input);
                     if(result) {
                         runAction(result, editor, this);
+                        if(!result.isVirtual) {
+                            this.lastNormalCmd = result;
+                        }
                     }
                     break;
                 }
@@ -107,6 +115,9 @@ export class Vim
                     const result = this.visualParser.parse(input);
                     if(result) {
                         runAction(result, editor, this);
+                        if(!result.isVirtual) {
+                            this.lastVisualCmd = result;
+                        }
                     }
                     break;
                 }
@@ -153,5 +164,12 @@ export class Vim
     }
     public getMode(): Mode {
         return this.mode;
+    }
+    public getLastCmd(): NormalResult | undefined {
+        if(this.mode === Mode.NORMAL) {
+            return this.lastNormalCmd;
+        } else if(this.mode === Mode.VISUAL) {
+            return this.lastVisualCmd;
+        }
     }
 };

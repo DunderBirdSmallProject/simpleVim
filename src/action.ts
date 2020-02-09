@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { Mode, Vim } from './vim';
 import * as motion from './motion';
 import * as operation from './operation';
+import { runAction } from './interpret'
 
 export interface ActionArg {
     editor: vscode.TextEditor,
@@ -179,6 +180,15 @@ export let operation2Dict: ActionDict = {
             lineNumber: lineNumber,
             at: at
         });
+        return acArg;
+    }
+};
+export let virtualDict: ActionDict = {
+    ".": async (acArg: ActionArg) => {
+        let parseResult = acArg.v.getLastCmd();
+        if(parseResult) {
+            await runAction(parseResult, acArg.editor, acArg.v);
+        }
         return acArg;
     }
 };

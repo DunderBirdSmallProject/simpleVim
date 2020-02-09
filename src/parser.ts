@@ -1,5 +1,5 @@
 import { getSvimEsc } from './config';
-import { operation0Dict, operation1Dict, operation2Dict, motion0Dict, motion1Dict } from './action';
+import { operation0Dict, operation1Dict, operation2Dict, motion0Dict, motion1Dict, virtualDict } from './action';
 
 enum ParseState {
     operation,
@@ -13,6 +13,7 @@ enum CharType {
     motion0, // motion operation that takes no argument
     motion1, // motion operation that takes one argument
     number,
+    virtual,
     None // invalid
 }
 
@@ -22,6 +23,7 @@ export interface NormalResult {
     cntMotionStr: string,
     cntOperationStr: string,
     arg: string,
+    isVirtual?: boolean,
 }
 
 function getCharType(c: string, state: ParseState): CharType {
@@ -30,6 +32,7 @@ function getCharType(c: string, state: ParseState): CharType {
     const isOp0 = c in operation0Dict;
     const isOp1 = c in operation1Dict;
     const isOp2 = c in operation2Dict;
+    const isV = c in virtualDict;
     const isN = "1234567890".indexOf(c) !== -1;
     if(state === ParseState.motion) {
         if(isM0) {
@@ -50,6 +53,8 @@ function getCharType(c: string, state: ParseState): CharType {
             return CharType.operation2;
         } else if(isN) {
             return CharType.number;
+        } else if(isV) {
+            return CharType.virtual;
         }
     }
     return CharType.None;
@@ -113,6 +118,12 @@ export class NormalParser
                     case CharType.operation0: {
                         this.operationStr = c[0];
                         return this._normal_compactReset();
+                    }
+                    case CharType.virtual: {
+                        this.operationStr = c[0];
+                        let virtualResult = this._normal_compactReset();
+                        virtualResult.isVirtual = true;
+                        return virtualResult;
                     }
                     case CharType.operation1: {
                         this.operationStr = c[0];
