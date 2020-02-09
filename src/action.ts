@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { Mode, Vim } from './vim';
 import * as motion from './motion';
 import * as operation from './operation';
-import { runAction } from './interpret'
+import { runAction } from './interpret';
 
 export interface ActionArg {
     editor: vscode.TextEditor,
