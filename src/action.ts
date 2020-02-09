@@ -117,12 +117,6 @@ function opActionWrapper(acFunc: Action): Action {
         return acArg;
     };
 }
-function opRangeWrapper(opFunc: operation.Operation): Action {
-    return async (acArg) => {
-        await opFunc(acArg);
-        return acArg;
-    };
-}
 
 export let operation0Dict: ActionDict = {
     "i": setInsertMode,
@@ -192,10 +186,10 @@ export let operation0Dict: ActionDict = {
     },
 };
 export let operation1Dict: ActionDict = {
-    "d": opActionWrapper(opRangeWrapper(operation.deleteRange)),
-    "y": opActionWrapper(opRangeWrapper(operation.copyRange)),
-    ">": opRangeWrapper(operation.indentRange),
-    "<": opRangeWrapper(operation.reIndentRange)
+    "d": opActionWrapper(operation.deleteRange),
+    "y": opActionWrapper(operation.copyRange),
+    ">": operation.indentRange,
+    "<": operation.reIndentRange
 };
 export let operation2Dict: ActionDict = {
     "f": moveCursorArgWrapper(motion.nextCharOnLine),
