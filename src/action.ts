@@ -72,15 +72,15 @@ async function setVisualModeLine(acArg: ActionArg): Promise<ActionArg> {
  * @return Promise<ActionArg>
  */
 async function enterNewLine(acArg: ActionArg, direct: boolean): Promise<ActionArg> {
-    let nextLineEnd : vscode.Position;
+    let nextLineEnd: vscode.Position;
     const curLine = acArg.editor.selection.active.line;
-    if(direct) {
+    if (direct) {
         await acArg.editor.edit(e => {
             const curPos = acArg.editor.selection.active;
             const endPos = motion.endLine(curPos);
             e.insert(endPos, '\n');
         });
-        nextLineEnd = acArg.editor.document.lineAt(curLine+1).range.end;
+        nextLineEnd = acArg.editor.document.lineAt(curLine + 1).range.end;
     } else {
         await acArg.editor.edit(e => {
             const curPos = acArg.editor.selection.active;
@@ -161,8 +161,8 @@ export let operation0Dict: ActionDict = {
     }),
     "p": opActionWrapper(async (acArg: ActionArg) => {
         let toInsert = acArg.v.getReg();
-        if(toInsert && toInsert !== '^$') {
-            if(toInsert.indexOf('^$') === 0) {
+        if (toInsert && toInsert !== '^$') {
+            if (toInsert.indexOf('^$') === 0) {
                 toInsert = toInsert.slice(2);
                 await enterNewLine(acArg, true);
             }
@@ -174,8 +174,8 @@ export let operation0Dict: ActionDict = {
     }),
     "P": opActionWrapper(async (acArg: ActionArg) => {
         let toInsert = acArg.v.getReg();
-        if(toInsert && toInsert !== '^$') {
-            if(toInsert.indexOf('^$') === 0) {
+        if (toInsert && toInsert !== '^$') {
+            if (toInsert.indexOf('^$') === 0) {
                 toInsert = toInsert.slice(2);
                 await enterNewLine(acArg, false);
             }
@@ -228,7 +228,7 @@ export let operation2Dict: ActionDict = {
     "z": async (acArg: ActionArg) => {
         let lineNumber = acArg.editor.selection.active.line;
         let at: string;
-        switch(acArg.arg) {
+        switch (acArg.arg) {
             case 'z': {
                 at = 'center';
                 break;
@@ -258,7 +258,7 @@ export let operation2Dict: ActionDict = {
 export let virtualDict: ActionDict = {
     ".": async (acArg: ActionArg) => {
         let parseResult = acArg.v.getLastCmd();
-        if(parseResult) {
+        if (parseResult) {
             await runAction(parseResult, acArg.editor, acArg.v);
         }
         return acArg;

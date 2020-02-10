@@ -41,9 +41,9 @@ export class Vim
         });
     }
     public resumeNormal(editor: vscode.TextEditor) {
+        const curPos = editor.selection.active;
         switch(this.mode) {
             case Mode.VISUAL: {
-                const curPos = editor.selection.active;
                 editor.selection = new vscode.Selection(curPos, curPos);
                 this.setMode(Mode.NORMAL);
                 break;
@@ -144,6 +144,7 @@ export class Vim
                 if(this.mode === Mode.VISUAL) {
                     editor.selection = new vscode.Selection(editor.selection.anchor, editor.selection.anchor);
                 }
+                editor.selection = new vscode.Selection(editor.selection.active, editor.selection.active);
                 vscode.window.activeTextEditor.options = {
                     cursorStyle: vscode.TextEditorCursorStyle.Block
                 };
