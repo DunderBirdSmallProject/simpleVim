@@ -134,6 +134,24 @@ function opActionWrapper(acFunc: Action): Action {
 }
 
 /**
+ * change string to commands
+ * @param cmds string array that represents a series of commands
+ */
+function strActionWrapper(cmds: string[]): Action {
+    return async (acArg: ActionArg) => {
+        try {
+            for(let str of cmds) {
+                await vscode.commands.executeCommand(str);
+            }
+        }
+        catch(error) {
+            vscode.window.showErrorMessage('svim: ' + error);
+        }
+        return acArg;
+    };
+}
+
+/**
  * operation that takes no arguments
  */
 export let operation0Dict: ActionDict = {
@@ -202,6 +220,10 @@ export let operation0Dict: ActionDict = {
         });
         return acArg;
     },
+    "J": strActionWrapper(['workbench.action.focusNextGroup']),
+    "K": strActionWrapper(['workbench.action.focusPreviousGroup']),
+    "H": strActionWrapper(['workbench.action.previousEditorInGroup']),
+    "L": strActionWrapper(['workbench.action.nextEditorInGroup'])
 };
 /**
  * operation that takes a range argument
