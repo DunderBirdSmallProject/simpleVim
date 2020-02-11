@@ -219,7 +219,9 @@ export let operation0Dict: ActionDict = {
     },
     "[": strActionWrapper(['workbench.action.navigateBack']),
     "]": strActionWrapper(['workbench.action.navigateForward']),
-    "%": strActionWrapper(['editor.action.jumpToBracket'])
+    "%": strActionWrapper(['editor.action.jumpToBracket']),
+    "/": strActionWrapper(['editor.action.addCommentLine']),
+    "\\": strActionWrapper(['editor.action.removeCommentLine'])
 };
 /**
  * operation that takes a range argument
