@@ -73,25 +73,11 @@ async function setVisualModeLine(acArg: ActionArg): Promise<ActionArg> {
  * @return Promise<ActionArg>
  */
 async function enterNewLine(acArg: ActionArg, direct: boolean): Promise<ActionArg> {
-    let nextLineEnd: vscode.Position;
-    const curLine = acArg.editor.selection.active.line;
     if (direct) {
-        await acArg.editor.edit(e => {
-            const curPos = acArg.editor.selection.active;
-            const endPos = motion.endLine(curPos);
-            e.insert(endPos, '\n');
-        });
-        nextLineEnd = acArg.editor.document.lineAt(curLine + 1).range.end;
+        vscode.commands.executeCommand('editor.action.insertLineAfter');
     } else {
-        await acArg.editor.edit(e => {
-            const curPos = acArg.editor.selection.active;
-            e.insert(motion.startLine(curPos), '\n');
-        });
-        nextLineEnd = acArg.editor.document.lineAt(curLine).range.end;
+        vscode.commands.executeCommand('editor.action.insertLineBefore');
     }
-    // move the cursor
-    acArg.v.noticeMove(acArg.editor, nextLineEnd);
-    acArg.editor.revealRange(new vscode.Range(motion.startLine(nextLineEnd), motion.endLine(nextLineEnd)));
     return acArg;
 }
 /**
