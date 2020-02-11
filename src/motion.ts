@@ -118,11 +118,11 @@ function nextWordOnLine(pos: vscode.Position): vscode.Position {
         let pChar = pos.character + 1;
         while(pChar < text.length) {
             if(isWordSeparator(text[pChar])) {
-                return new vscode.Position(pos.line, pChar);
+                return new vscode.Position(pos.line, pChar+1);
             }
             pChar++;
         }
-        return new vscode.Position(pos.line, text.length-1);
+        return new vscode.Position(pos.line, text.length);
     }
     return pos;
 }

@@ -1,5 +1,7 @@
 {
-	"name": "simplevim",
+    "name": "simplevim",
+    "publisher": "Chen",
+    "repository": "https://github.com/DunderBird/simpleVim",
 	"displayName": "simpleVim",
 	"description": "",
 	"version": "0.0.1",

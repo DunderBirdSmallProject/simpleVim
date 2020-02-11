@@ -239,7 +239,12 @@ export let operation1Dict: ActionDict = {
     "d": opActionWrapper(operation.deleteRange),
     "y": opActionWrapper(operation.copyRange),
     ">": operation.indentRange,
-    "<": operation.reIndentRange
+    "<": operation.reIndentRange,
+    "c": async (acArg: ActionArg) => {
+            await operation.deleteRange(acArg);
+            await setInsertMode(acArg);
+            return acArg;
+        }
 };
 /**
  * operation that takes a character argument
