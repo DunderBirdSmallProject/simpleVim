@@ -211,12 +211,15 @@ export let operation0Dict: ActionDict = {
     "K": strActionWrapper(['workbench.action.focusPreviousGroup']),
     "H": strActionWrapper(['workbench.action.previousEditorInGroup']),
     "L": strActionWrapper(['workbench.action.nextEditorInGroup']),
-    '_': async (acArg: ActionArg) => {
+    '|': async (acArg: ActionArg) => {
         if(acArg.strCmdArg) {
             await strActionWrapper(acArg.strCmdArg)(acArg);
         }
         return acArg;
-    }
+    },
+    "[": strActionWrapper(['workbench.action.navigateBack']),
+    "]": strActionWrapper(['workbench.action.navigateForward']),
+    "%": strActionWrapper(['editor.action.jumpToBracket'])
 };
 /**
  * operation that takes a range argument

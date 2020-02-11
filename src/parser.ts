@@ -116,7 +116,7 @@ export class NormalParser
             if(isprefixOfCmd(this.cmdStringBuffer)) {
                 const cmdStrList = getCmd(this.cmdStringBuffer);
                 if(cmdStrList) {
-                    this.operationStr = '_';
+                    this.operationStr = '|';
                     let result = this._normal_compactReset();
                     result.strCmd = cmdStrList;
                     return result;
