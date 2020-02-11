@@ -215,7 +215,7 @@ export class InsertParser
             }
         } 
         else {
-            this.buffer = "";
+            this.buffer = input[0] === ',' ? ',' : '';
         }
         return false;
     }
