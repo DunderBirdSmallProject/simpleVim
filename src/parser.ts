@@ -1,10 +1,10 @@
-import { getSvimEsc } from './config';
+import { getSvimEsc, getCmd, isprefixOfCmd } from './config';
 import { operation0Dict, operation1Dict, operation2Dict, motion0Dict, motion1Dict, virtualDict } from './action';
 
 enum ParseState {
     operation,
     motion,
-    arg
+    arg,
 }
 enum CharType {
     operation0, // operation that takes no argument 
@@ -24,6 +24,7 @@ export interface NormalResult {
     cntOperationStr: string,
     arg: string,
     isVirtual?: boolean,
+    strCmd ?: string[]
 }
 
 function getCharType(c: string, state: ParseState): CharType {
@@ -73,6 +74,8 @@ export class NormalParser
     protected readOperationCnt: boolean = false;
     protected readMotionCnt: boolean = false;
 
+    private cmdStringBuffer: string = "";
+
     constructor() {
         this.reset();
     }
@@ -83,6 +86,7 @@ export class NormalParser
         this.cntOperationStr = "";
         this.operationStr ="";
         this.arg = "";
+        this.cmdStringBuffer = "";
         this.readOperationCnt = false;
         this.readMotionCnt = false;
 
@@ -107,6 +111,20 @@ export class NormalParser
     }
     public parse(c: string): NormalResult | undefined  {
         const cType = getCharType(c, this.state);
+        if(this.state === ParseState.operation) {
+            this.cmdStringBuffer += c[0];
+            if(isprefixOfCmd(this.cmdStringBuffer)) {
+                const cmdStrList = getCmd(this.cmdStringBuffer);
+                if(cmdStrList) {
+                    this.operationStr = '_';
+                    let result = this._normal_compactReset();
+                    result.strCmd = cmdStrList;
+                    return result;
+                }
+            } else {
+                this.cmdStringBuffer = c[0];
+            }
+        }
         switch(this.state) {
             case ParseState.operation: {
                 switch(cType) {

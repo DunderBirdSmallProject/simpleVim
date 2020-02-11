@@ -12,3 +12,19 @@ export function isWordSeparator(c: String): boolean {
 export function getSvimEsc(): string {
     return ",jk";
 }
+
+let cmdList = vscode.workspace.getConfiguration('svimCmd');
+
+export function isprefixOfCmd(str: string): boolean {
+    for(let cmdStr in cmdList) {
+        if(cmdStr.indexOf(str) === 0) {
+            return true;
+        }
+    }
+    return false;
+}
+export function getCmd(str: string): string[] | undefined {
+    if(str in cmdList) {
+        return cmdList[str];
+    }
+}

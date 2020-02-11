@@ -9,7 +9,8 @@ export interface ActionArg {
     v: Vim,
     range: vscode.Range,
     arg: string,
-    lineOp?: boolean
+    lineOp?: boolean,
+    strCmdArg?: string[]
 }
 export interface Action {
     (acArg: ActionArg): Thenable<ActionArg>;
@@ -223,7 +224,13 @@ export let operation0Dict: ActionDict = {
     "J": strActionWrapper(['workbench.action.focusNextGroup']),
     "K": strActionWrapper(['workbench.action.focusPreviousGroup']),
     "H": strActionWrapper(['workbench.action.previousEditorInGroup']),
-    "L": strActionWrapper(['workbench.action.nextEditorInGroup'])
+    "L": strActionWrapper(['workbench.action.nextEditorInGroup']),
+    '_': async (acArg: ActionArg) => {
+        if(acArg.strCmdArg) {
+            await strActionWrapper(acArg.strCmdArg)(acArg);
+        }
+        return acArg;
+    }
 };
 /**
  * operation that takes a range argument

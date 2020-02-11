@@ -10,7 +10,8 @@ interface CompileResult {
     operation: Action,
     range: vscode.Range,
     arg: string,
-    lineOp?: boolean
+    lineOp?: boolean,
+    strCmdArg?: string[]
 }
 
 function compile(parseResult: NormalResult): CompileResult | undefined {
@@ -44,6 +45,7 @@ function compile(parseResult: NormalResult): CompileResult | undefined {
             operation: f,
             range: new vscode.Range(curPos, curPos),
             arg: parseResult.arg,
+            strCmdArg: parseResult.strCmd,
         };
         
         if(parseResult.motionStr !== "" && isOperation1) {
@@ -97,7 +99,8 @@ export async function runAction(parseResult: NormalResult, editor: vscode.TextEd
                 v: v,
                 range: compileResult.range,
                 arg: compileResult.arg,
-                lineOp: compileResult.lineOp
+                lineOp: compileResult.lineOp,
+                strCmdArg: compileResult.strCmdArg
             });
             compileResult = compile(parseResult);
         }
