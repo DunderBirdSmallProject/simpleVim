@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 export function getWordSeparatorConfig(): string {
     let editorConfig = vscode.workspace.getConfiguration('editor');
-    return editorConfig['wordSeparators'];
+    return editorConfig['wordSeparators'] + ' ';
 }
 
 export function isWordSeparator(c: String): boolean {
@@ -12,7 +12,6 @@ export function isWordSeparator(c: String): boolean {
 export function getSvimEsc(): string {
     return ",jk";
 }
-
 interface CmdStr {
     [index: string]: string[]
 }
