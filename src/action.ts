@@ -196,7 +196,7 @@ export let operation0Dict: ActionDict = {
     "l": moveCursorWrapper(motion.rightChar),
     "w": moveCursorWrapper(motion.nextWordOnLine),
     "b": moveCursorWrapper(motion.lastWordOnLine),
-    "s": moveCursorWrapper(motion.startLine),
+    "s": moveCursorWrapper(motion.startLineNonWhiteSpace),
     "e": moveCursorWrapper(motion.endLine),
     "D": moveCursorWrapper(motion.down20),
     "U": moveCursorWrapper(motion.up20),

@@ -144,6 +144,14 @@ function lastWordOnLine(pos: vscode.Position): vscode.Position {
 function startLine(pos: vscode.Position): vscode.Position {
     return new vscode.Position(pos.line, 0);
 }
+function startLineNonWhiteSpace(pos: vscode.Position): vscode.Position {
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+        const fstNonWhiteidx = editor.document.lineAt(pos.line).firstNonWhitespaceCharacterIndex;
+        return new vscode.Position(pos.line, fstNonWhiteidx);
+    }
+    return pos;
+}
 function endLine(pos: vscode.Position): vscode.Position {
     const editor = vscode.window.activeTextEditor;
     if(editor) {
@@ -160,5 +168,5 @@ function wholeLineWithSep(editor: vscode.TextEditor, pos: vscode.Position): vsco
 
 export { leftChar, rightChar, upChar, downChar, downCnt, upCnt,
             nextCharOnLine, previousCharOnLine, nextWordOnLine, lastWordOnLine,
-            startLine, endLine, down20, up20 };
+            startLine, startLineNonWhiteSpace, endLine, down20, up20 };
 export { wholeLineWithSep };
