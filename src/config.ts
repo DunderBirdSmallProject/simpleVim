@@ -13,7 +13,11 @@ export function getSvimEsc(): string {
     return ",jk";
 }
 
-let cmdList = vscode.workspace.getConfiguration('svimCmd');
+interface CmdStr {
+    [index: string]: string[]
+}
+
+let cmdList = vscode.workspace.getConfiguration().get<CmdStr>('svim.svimCmd');
 
 export function isprefixOfCmd(str: string): boolean {
     for(let cmdStr in cmdList) {
@@ -24,7 +28,7 @@ export function isprefixOfCmd(str: string): boolean {
     return false;
 }
 export function getCmd(str: string): string[] | undefined {
-    if(str in cmdList) {
+    if(cmdList && str in cmdList) {
         return cmdList[str];
     }
 }

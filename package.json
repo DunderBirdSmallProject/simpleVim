@@ -26,7 +26,15 @@
                 "command": "extension.svim_escape",
                 "when": "editorTextFocus"
             }
-        ]
+        ],
+        "configuration": {
+            "title": "svim",
+            "properties": {
+                "svim.svimCmd": {
+                    "Y": ["editor.action.insertCursorAbove"]
+                }
+            }
+        }
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
