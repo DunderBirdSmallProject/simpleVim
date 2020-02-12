@@ -130,10 +130,10 @@ function lastWordOnLine(pos: vscode.Position): vscode.Position {
     const editor = vscode.window.activeTextEditor;
     if(editor) {
         const text = currentLine(editor, pos).text;
-        let pChar = pos.character - 1;
+        let pChar = pos.character - 2;
         while(pChar >= 0) {
             if(isWordSeparator(text[pChar])) {
-                return new vscode.Position(pos.line, pChar);
+                return new vscode.Position(pos.line, pChar+1);
             }
             pChar--;
         }

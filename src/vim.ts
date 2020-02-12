@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { NormalParser, InsertParser, VisualParser, NormalResult } from './parser';
 import { runAction } from './interpret';
 import { getSvimEsc } from './config';
-import { stringify } from 'querystring';
 
 export enum Mode {
     NORMAL,
