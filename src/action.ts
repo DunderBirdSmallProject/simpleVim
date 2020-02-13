@@ -3,6 +3,7 @@ import { Mode, Vim } from './vim';
 import * as motion from './motion';
 import * as operation from './operation';
 import { runAction } from './interpret';
+import * as tool from './tool';
 
 export interface ActionArg {
     editor: vscode.TextEditor,
@@ -74,9 +75,9 @@ async function setVisualModeLine(acArg: ActionArg): Promise<ActionArg> {
  */
 async function enterNewLine(acArg: ActionArg, direct: boolean): Promise<ActionArg> {
     if (direct) {
-        vscode.commands.executeCommand('editor.action.insertLineAfter');
+        await vscode.commands.executeCommand('editor.action.insertLineAfter');
     } else {
-        vscode.commands.executeCommand('editor.action.insertLineBefore');
+        await vscode.commands.executeCommand('editor.action.insertLineBefore');
     }
     return acArg;
 }
@@ -171,6 +172,7 @@ export let operation0Dict: ActionDict = {
                 toInsert = toInsert.slice(2);
                 await enterNewLine(acArg, true);
             }
+            toInsert = tool.stripRight(toInsert);
             await acArg.editor.edit((e) => {
                 e.insert(acArg.editor.selection.active, <string>toInsert);
             });
@@ -184,6 +186,7 @@ export let operation0Dict: ActionDict = {
                 toInsert = toInsert.slice(2);
                 await enterNewLine(acArg, false);
             }
+            toInsert = tool.stripRight(toInsert);
             await acArg.editor.edit((e) => {
                 e.insert(acArg.editor.selection.active, <string>toInsert);
             });
