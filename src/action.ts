@@ -201,8 +201,28 @@ export let operation0Dict: ActionDict = {
     "b": moveCursorWrapper(motion.lastWordOnLine),
     "s": moveCursorWrapper(motion.startLineNonWhiteSpace),
     "e": moveCursorWrapper(motion.endLine),
-    "D": moveCursorWrapper(motion.down20),
-    "U": moveCursorWrapper(motion.up20),
+    "D": async (acArg: ActionArg) => {
+        if(acArg.editor) {
+            await moveCursorWrapper(motion.down20)(acArg);
+            const currentLine = acArg.editor.selection.active.line;
+            await vscode.commands.executeCommand('revealLine', {
+                lineNumber: currentLine, 
+                at: 'center'
+            });
+        }
+        return acArg;
+    },
+    "U": async (acArg: ActionArg) => {
+        if(acArg.editor) {
+            await moveCursorWrapper(motion.up20)(acArg);
+            const currentLine = acArg.editor.selection.active.line;
+            await vscode.commands.executeCommand('revealLine', {
+                lineNumber: currentLine,
+                at: 'center'
+            });
+        }
+        return acArg;
+    },
     "x": async (acArg: ActionArg) => {
         await acArg.editor.edit(e => {
             const curPos = acArg.editor.selection.active;
