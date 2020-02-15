@@ -79,6 +79,9 @@ async function enterNewLine(acArg: ActionArg, direct: boolean): Promise<ActionAr
     } else {
         await vscode.commands.executeCommand('editor.action.insertLineBefore');
     }
+    const line = acArg.editor.selection.active.line;
+    const beginOfLine = new vscode.Position(line, 0);
+    acArg.editor.selection = new vscode.Selection(beginOfLine, beginOfLine);
     return acArg;
 }
 /**
