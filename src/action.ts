@@ -336,8 +336,21 @@ export let motion1Dict: Motion1Dict = {
     "f": motionArgWrapper(motion.nextCharOnLine),
     "F": motionArgWrapper(motion.previousCharOnLine),
     "i": (pos, c) => {
-        const prePos = motion.previousCharOnLine(pos, c);
-        const nextPos = motion.nextCharOnLine(pos, c);
+        let fstChar = c;
+        let lstChar: string;
+        if(c === '(') {
+            lstChar = ')';
+        } else if(c === '[') {
+            lstChar = ']';
+        } else if(c === '{') {
+            lstChar = '}';
+        } else if(c === '<') {
+            lstChar = '>';
+        } else {
+            lstChar = c;
+        }
+        const prePos = motion.previousCharOnLine(pos, fstChar);
+        const nextPos = motion.nextCharOnLine(pos, lstChar);
         const prePosnext = motion.rightChar(prePos);
         return new vscode.Range(prePosnext, nextPos);
     }
