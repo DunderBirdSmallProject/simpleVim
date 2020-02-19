@@ -71,17 +71,20 @@ async function setVisualModeLine(acArg: ActionArg): Promise<ActionArg> {
  * enter a new line above or below and move the cursor to the end of that line
  * @param acArg Action arguments
  * @param direct true: down false: up
+ * @param indent whether auto indent
  * @return Promise<ActionArg>
  */
-async function enterNewLine(acArg: ActionArg, direct: boolean): Promise<ActionArg> {
+async function enterNewLine(acArg: ActionArg, direct: boolean, indent: boolean = false): Promise<ActionArg> {
     if (direct) {
         await vscode.commands.executeCommand('editor.action.insertLineAfter');
     } else {
         await vscode.commands.executeCommand('editor.action.insertLineBefore');
     }
-    const line = acArg.editor.selection.active.line;
-    const beginOfLine = new vscode.Position(line, 0);
-    acArg.editor.selection = new vscode.Selection(beginOfLine, beginOfLine);
+    if(!indent) {
+        const line = acArg.editor.selection.active.line;
+        const beginOfLine = new vscode.Position(line, 0);
+        acArg.editor.selection = new vscode.Selection(beginOfLine, beginOfLine);
+    }
     return acArg;
 }
 /**
@@ -155,12 +158,12 @@ export let operation0Dict: ActionDict = {
     "v": setVisualModeNotLine,
     "V": setVisualModeLine,
     "o": opActionWrapper(async (acArg: ActionArg) => {
-        await enterNewLine(acArg, true);
+        await enterNewLine(acArg, true, true);
         await setInsertMode(acArg);
         return acArg;
     }),
     "O": opActionWrapper(async (acArg: ActionArg) => {
-        await enterNewLine(acArg, false);
+        await enterNewLine(acArg, false, true);
         await setInsertMode(acArg);
         return acArg;
     }),
