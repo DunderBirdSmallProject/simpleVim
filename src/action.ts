@@ -82,7 +82,12 @@ async function enterNewLine(acArg: ActionArg, direct: boolean, indent: boolean =
     }
     if(!indent) {
         const line = acArg.editor.selection.active.line;
+        const character = acArg.editor.selection.active.character;
         const beginOfLine = new vscode.Position(line, 0);
+        const curPos = new vscode.Position(line, character);
+        await acArg.editor.edit(e => {
+            e.delete(new vscode.Range(beginOfLine, curPos));
+        });
         acArg.editor.selection = new vscode.Selection(beginOfLine, beginOfLine);
     }
     return acArg;
@@ -180,6 +185,7 @@ export let operation0Dict: ActionDict = {
                 await enterNewLine(acArg, true);
             }
             toInsert = tool.stripRight(toInsert);
+            console.log(toInsert.length);
             await acArg.editor.edit((e) => {
                 e.insert(acArg.editor.selection.active, <string>toInsert);
             });
@@ -213,6 +219,7 @@ export let operation0Dict: ActionDict = {
         const lineCnt = editor.document.lineCount;
         const pos = new vscode.Position(lineCnt - 1, 0);
         editor.selection = new vscode.Selection(pos, pos);
+        acArg.v.noticeMove(editor, pos);
         await vscode.commands.executeCommand('revealLine', {
             lineNumber: lineCnt - 1,
             at: 'center'
@@ -325,6 +332,7 @@ export let operation2Dict: ActionDict = {
                 toLine = 0;
                 let pos = new vscode.Position(0, 0);
                 editor.selection = new vscode.Selection(pos, pos);
+                acArg.v.noticeMove(editor, pos);
                 break;
             }
             default: {
