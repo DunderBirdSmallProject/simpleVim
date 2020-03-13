@@ -97,7 +97,8 @@ function moveCursorWrapper(motionFunc: Pos2Pos) {
         const nextPos = motionFunc(curPos);
         acArg.v.noticeMove(acArg.editor, nextPos);
         //editor.selection = new vscode.Selection(nextPos, nextPos);
-        acArg.editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
+        // acArg.editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
+        acArg.editor.revealRange(new vscode.Range(nextPos, nextPos));
         return acArg;
     };
 }
