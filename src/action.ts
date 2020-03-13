@@ -207,6 +207,17 @@ export let operation0Dict: ActionDict = {
     "b": moveCursorWrapper(motion.lastWordOnLine),
     "s": moveCursorWrapper(motion.startLineNonWhiteSpace),
     "e": moveCursorWrapper(motion.endLine),
+    "G": async (acArg: ActionArg) => {
+        let editor = acArg.editor;
+        const lineCnt = editor.document.lineCount;
+        const pos = new vscode.Position(lineCnt - 1, 0);
+        editor.selection = new vscode.Selection(pos, pos);
+        await vscode.commands.executeCommand('revealLine', {
+            lineNumber: lineCnt - 1,
+            at: 'center'
+        });
+        return acArg;
+    },
     "D": async (acArg: ActionArg) => {
         if(acArg.editor) {
             await moveCursorWrapper(motion.down20)(acArg);
@@ -302,6 +313,26 @@ export let operation2Dict: ActionDict = {
         await vscode.commands.executeCommand('revealLine', {
             lineNumber: lineNumber,
             at: at
+        });
+        return acArg;
+    },
+    "g": async (acArg: ActionArg) => {
+        const editor = acArg.editor;
+        let toLine = editor.selection.active.line;
+        switch (acArg.arg) {
+            case 'g': {
+                toLine = 0;
+                let pos = new vscode.Position(0, 0);
+                editor.selection = new vscode.Selection(pos, pos);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+        await vscode.commands.executeCommand('revealLine', {
+            lineNumber: toLine,
+            at: 'center'
         });
         return acArg;
     }
