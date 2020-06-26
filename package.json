@@ -1,7 +1,7 @@
 {
-    "name": "simplevim",
-    "publisher": "Chen",
-    "repository": "https://github.com/DunderBird/simpleVim",
+	"name": "simplevim",
+	"publisher": "Chen",
+	"repository": "https://github.com/DunderBird/simpleVim",
 	"displayName": "simpleVim",
 	"description": "",
 	"version": "0.0.1",
@@ -21,22 +21,24 @@
 				"command": "extension.svim_toggle",
 				"title": "svim start"
 			}
-        ],
-        "keybindings": [
-            {
-                "key": "Escape",
-                "command": "extension.svim_escape",
-                "when": "editorTextFocus"
-            }
-        ],
-        "configuration": {
-            "title": "svim",
-            "properties": {
-                "svim.svimCmd": {
-                    "Y": ["editor.action.insertCursorAbove"]
-                }
-            }
-        }
+		],
+		"keybindings": [
+			{
+				"key": "Escape",
+				"command": "extension.svim_escape",
+				"when": "editorTextFocus"
+			}
+		],
+		"configuration": {
+			"title": "svim",
+			"properties": {
+				"svim.svimCmd": {
+					"Y": [
+						"editor.action.insertCursorAbove"
+					]
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
