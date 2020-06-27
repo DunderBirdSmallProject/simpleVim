@@ -60,6 +60,6 @@
 		"mocha": "^7.0.1",
 		"typescript": "^3.7.5",
         "vscode-test": "^1.3.0",
-        "minimist": ">=0.2.1"
+        "minimist": ">=1.2.3"
 	}
 }
