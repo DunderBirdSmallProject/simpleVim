@@ -17,13 +17,13 @@ export function activate(context: vscode.ExtensionContext) {
         if (!vscode.window.activeTextEditor) {
             return;
         }
-        sVim.setMode(Mode.NORMAL);
+        sVim.resumeNormal(vscode.window.activeTextEditor);
     });
     registerCommand('extension.svim_toggle', function () {
         if (!vscode.window.activeTextEditor) {
             return;
         }
-        sVim.setMode(Mode.NORMAL);
+        sVim.resumeNormal(vscode.window.activeTextEditor);
     });
 }
 

@@ -206,10 +206,58 @@ export let operation0Dict: ActionDict = {
         }
         return acArg;
     }),
-    "h": moveCursorWrapper(motion.leftChar),
-    "j": moveCursorWrapper(motion.downChar),
-    "k": moveCursorWrapper(motion.upChar),
-    "l": moveCursorWrapper(motion.rightChar),
+    "h": async (acArg: ActionArg) => {
+        if (acArg.v.getMode() == Mode.VISUAL) {
+            return moveCursorWrapper(motion.leftChar)(acArg);
+        }
+        else {
+            await vscode.commands.executeCommand('cursorMove', {
+                to: 'left',
+                by: 'wrappedLine',
+            });
+            return acArg;
+        }
+    },
+    "j": async (acArg: ActionArg) => {
+        if (acArg.v.getMode() == Mode.VISUAL) {
+            return moveCursorWrapper(motion.downChar)(acArg);
+        }
+        else {
+            await vscode.commands.executeCommand('cursorMove', {
+                to: 'down',
+                by: 'wrappedLine',
+            });
+            return acArg;
+        }
+    },
+    "k": async (acArg: ActionArg) => {
+        if (acArg.v.getMode() == Mode.VISUAL) {
+            return moveCursorWrapper(motion.upChar)(acArg);
+        }
+        else {
+            await vscode.commands.executeCommand('cursorMove', {
+                to: 'up',
+                by: 'wrappedLine',
+            });
+            return acArg;
+        }
+    },
+    "l": async (acArg: ActionArg) => {
+        if (acArg.v.getMode() == Mode.VISUAL) {
+            return moveCursorWrapper(motion.rightChar)(acArg);
+        }
+        else {
+            await vscode.commands.executeCommand('cursorMove', {
+                to: 'right',
+                by: 'wrappedLine',
+            });
+            return acArg;
+        }
+    },
+    // "h": moveCursorWrapper(motion.leftChar),
+    // "j": moveCursorWrapper(motion.downChar),
+    // "k": moveCursorWrapper(motion.upChar),
+    // "l": moveCursorWrapper(motion.rightChar),
     "w": moveCursorWrapper(motion.nextWordOnLine),
     "b": moveCursorWrapper(motion.lastWordOnLine),
     "s": moveCursorWrapper(motion.startLineNonWhiteSpace),
@@ -228,7 +276,16 @@ export let operation0Dict: ActionDict = {
     },
     "D": async (acArg: ActionArg) => {
         if (acArg.editor) {
-            await moveCursorWrapper(motion.down20)(acArg);
+            if (acArg.v.getMode() == Mode.VISUAL) {
+                await moveCursorWrapper(motion.down20)(acArg);
+            }
+            else {
+                await vscode.commands.executeCommand('cursorMove', {
+                    to: 'down',
+                    by: 'wrappedLine',
+                    value: 20,
+                })
+            }
             const currentLine = acArg.editor.selection.active.line;
             await vscode.commands.executeCommand('revealLine', {
                 lineNumber: currentLine,
@@ -239,7 +296,16 @@ export let operation0Dict: ActionDict = {
     },
     "U": async (acArg: ActionArg) => {
         if (acArg.editor) {
-            await moveCursorWrapper(motion.up20)(acArg);
+            if (acArg.v.getMode() == Mode.VISUAL) {
+                await moveCursorWrapper(motion.up20)(acArg);
+            }
+            else {
+                await vscode.commands.executeCommand('cursorMove', {
+                    to: 'up',
+                    by: 'wrappedLine',
+                    value: 20,
+                })
+            }
             const currentLine = acArg.editor.selection.active.line;
             await vscode.commands.executeCommand('revealLine', {
                 lineNumber: currentLine,

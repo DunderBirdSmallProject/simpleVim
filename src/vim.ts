@@ -39,6 +39,9 @@ export class Vim {
             this.setMode(Mode.NORMAL);
         });
     }
+    /*
+     * change State to Normal
+     */
     public resumeNormal(editor: vscode.TextEditor) {
         const curPos = editor.selection.active;
         switch (this.mode) {
@@ -134,6 +137,11 @@ export class Vim {
         this.normalParser.reset();
         this.visualParser.reset();
     }
+    /**
+     * This function will not set Selection
+     * @param newmode New mode
+     * @param arg control VISUAL Mode is line or not
+     */
     public setMode(newmode: Mode, arg: boolean = false): void {
         this.v_pos = undefined;
         this.v_line = false;
