@@ -399,5 +399,9 @@ export let motion1Dict: Motion1Dict = {
         const nextPos = motion.nextCharOnLine(pos, lstChar);
         const prePosnext = motion.rightChar(prePos);
         return new vscode.Range(prePosnext, nextPos);
+    },
+    "t": (pos, c) => {
+        const nextPos = motion.nextCharOnLine(pos, c);
+        return new vscode.Range(pos, nextPos);
     }
 };
