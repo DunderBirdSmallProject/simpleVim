@@ -80,7 +80,7 @@ async function enterNewLine(acArg: ActionArg, direct: boolean, indent: boolean =
     } else {
         await vscode.commands.executeCommand('editor.action.insertLineBefore');
     }
-    if(!indent) {
+    if (!indent) {
         const line = acArg.editor.selection.active.line;
         const character = acArg.editor.selection.active.character;
         const beginOfLine = new vscode.Position(line, 0);
@@ -140,11 +140,11 @@ function opActionWrapper(acFunc: Action): Action {
 function strActionWrapper(cmds: string[]): Action {
     return async (acArg: ActionArg) => {
         try {
-            for(let str of cmds) {
+            for (let str of cmds) {
                 await vscode.commands.executeCommand(str);
             }
         }
-        catch(error) {
+        catch (error) {
             vscode.window.showErrorMessage('svim: ' + error);
         }
         return acArg;
@@ -227,18 +227,18 @@ export let operation0Dict: ActionDict = {
         return acArg;
     },
     "D": async (acArg: ActionArg) => {
-        if(acArg.editor) {
+        if (acArg.editor) {
             await moveCursorWrapper(motion.down20)(acArg);
             const currentLine = acArg.editor.selection.active.line;
             await vscode.commands.executeCommand('revealLine', {
-                lineNumber: currentLine, 
+                lineNumber: currentLine,
                 at: 'center'
             });
         }
         return acArg;
     },
     "U": async (acArg: ActionArg) => {
-        if(acArg.editor) {
+        if (acArg.editor) {
             await moveCursorWrapper(motion.up20)(acArg);
             const currentLine = acArg.editor.selection.active.line;
             await vscode.commands.executeCommand('revealLine', {
@@ -260,7 +260,7 @@ export let operation0Dict: ActionDict = {
     "H": strActionWrapper(['workbench.action.previousEditorInGroup']),
     "L": strActionWrapper(['workbench.action.nextEditorInGroup']),
     '|': async (acArg: ActionArg) => {
-        if(acArg.strCmdArg) {
+        if (acArg.strCmdArg) {
             await strActionWrapper(acArg.strCmdArg)(acArg);
         }
         return acArg;
@@ -280,10 +280,10 @@ export let operation1Dict: ActionDict = {
     ">": operation.indentRange,
     "<": operation.reIndentRange,
     "c": async (acArg: ActionArg) => {
-            await operation.deleteRange(acArg);
-            await setInsertMode(acArg);
-            return acArg;
-        }
+        await operation.deleteRange(acArg);
+        await setInsertMode(acArg);
+        return acArg;
+    }
 };
 /**
  * operation that takes a character argument
@@ -384,13 +384,13 @@ export let motion1Dict: Motion1Dict = {
     "i": (pos, c) => {
         let fstChar = c;
         let lstChar: string;
-        if(c === '(') {
+        if (c === '(') {
             lstChar = ')';
-        } else if(c === '[') {
+        } else if (c === '[') {
             lstChar = ']';
-        } else if(c === '{') {
+        } else if (c === '{') {
             lstChar = '}';
-        } else if(c === '<') {
+        } else if (c === '<') {
             lstChar = '>';
         } else {
             lstChar = c;

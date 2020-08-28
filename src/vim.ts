@@ -9,8 +9,7 @@ export enum Mode {
     VISUAL
 };
 
-export class Vim
-{
+export class Vim {
     private mode: Mode;
     private normalParser: NormalParser;
     private insertParser: InsertParser;
@@ -23,7 +22,7 @@ export class Vim
     private lastVisualCmd: NormalResult | undefined;
 
     private normalReg: string | undefined;
-    
+
     constructor() {
         this.normalParser = new NormalParser();
         this.insertParser = new InsertParser();
@@ -34,7 +33,7 @@ export class Vim
         this.lastVisualCmd = undefined;
         this.normalReg = undefined;
         vscode.window.onDidChangeActiveTextEditor((textEditor) => {
-            if(!textEditor) {
+            if (!textEditor) {
                 return;
             }
             this.setMode(Mode.NORMAL);
@@ -42,7 +41,7 @@ export class Vim
     }
     public resumeNormal(editor: vscode.TextEditor) {
         const curPos = editor.selection.active;
-        switch(this.mode) {
+        switch (this.mode) {
             case Mode.VISUAL: {
                 editor.selection = new vscode.Selection(curPos, curPos);
                 this.setMode(Mode.NORMAL);
@@ -54,18 +53,18 @@ export class Vim
         }
     }
     public noticeMove(editor: vscode.TextEditor, pos: vscode.Position) {
-        switch(this.mode) {
+        switch (this.mode) {
             case Mode.INSERT:
             case Mode.NORMAL: {
                 editor.selection = new vscode.Selection(pos, pos);
                 break;
             }
             case Mode.VISUAL: {
-                if(this.v_pos) {
-                    if(this.v_line) {
+                if (this.v_pos) {
+                    if (this.v_line) {
                         const currentLine = editor.document.lineAt(pos);
-                        let nextEnd : vscode.Position;
-                        if(pos.line < this.v_pos.line) {
+                        let nextEnd: vscode.Position;
+                        if (pos.line < this.v_pos.line) {
                             this.v_pos = editor.document.lineAt(this.v_pos.line).range.end;
                             nextEnd = currentLine.range.start;
                         } else {
@@ -86,25 +85,25 @@ export class Vim
     }
     public getInput(input: string): void {
         const editor = vscode.window.activeTextEditor;
-        if(editor) {
-            switch(this.mode) {
+        if (editor) {
+            switch (this.mode) {
                 case Mode.NORMAL: {
                     let result = this.normalParser.parse(input);
-                    if(result) {
+                    if (result) {
                         runAction(result, editor, this);
-                        if(!result.isVirtual) {
+                        if (!result.isVirtual) {
                             this.lastNormalCmd = result;
                         }
                     }
                     break;
                 }
                 case Mode.INSERT: {
-                    if(this.insertParser.parse(input)) {
+                    if (this.insertParser.parse(input)) {
                         this.setMode(Mode.NORMAL);
                         editor.edit(e => {
                             const curPos = editor.selection.active;
                             // the last character of SvimEsc wasn't printed
-                            const startPos = new vscode.Position(curPos.line, curPos.character-getSvimEsc().length+1);
+                            const startPos = new vscode.Position(curPos.line, curPos.character - getSvimEsc().length + 1);
                             e.delete(new vscode.Range(startPos, curPos));
                         });
                     } else {
@@ -116,9 +115,9 @@ export class Vim
                 }
                 case Mode.VISUAL: {
                     const result = this.visualParser.parse(input);
-                    if(result) {
+                    if (result) {
                         runAction(result, editor, this);
-                        if(!result.isVirtual) {
+                        if (!result.isVirtual) {
                             this.lastVisualCmd = result;
                         }
                     }
@@ -135,26 +134,22 @@ export class Vim
         this.normalParser.reset();
         this.visualParser.reset();
     }
-    public setMode(newmode: Mode, arg: boolean=false): void {
+    public setMode(newmode: Mode, arg: boolean = false): void {
         this.v_pos = undefined;
         this.v_line = false;
-        if(vscode.window.activeTextEditor) {
+        if (vscode.window.activeTextEditor) {
             const editor = vscode.window.activeTextEditor;
-            if(newmode === Mode.NORMAL) {
-                if(this.mode === Mode.VISUAL) {
-                    editor.selection = new vscode.Selection(editor.selection.anchor, editor.selection.anchor);
-                }
-                editor.selection = new vscode.Selection(editor.selection.active, editor.selection.active);
+            if (newmode === Mode.NORMAL) {
                 vscode.window.activeTextEditor.options = {
                     cursorStyle: vscode.TextEditorCursorStyle.Block
                 };
-            } else if(newmode === Mode.INSERT) {
+            } else if (newmode === Mode.INSERT) {
                 vscode.window.activeTextEditor.options = {
                     cursorStyle: vscode.TextEditorCursorStyle.Line
                 };
-            } else if(newmode === Mode.VISUAL) {
+            } else if (newmode === Mode.VISUAL) {
                 this.v_line = arg;
-                if(this.v_line) {
+                if (this.v_line) {
                     const currentLine = editor.document.lineAt(editor.selection.active.line);
                     this.v_pos = currentLine.range.start;
                     editor.selection = new vscode.Selection(currentLine.range.start, currentLine.range.end);
@@ -173,9 +168,9 @@ export class Vim
         return this.v_line;
     }
     public getLastCmd(): NormalResult | undefined {
-        if(this.mode === Mode.NORMAL) {
+        if (this.mode === Mode.NORMAL) {
             return this.lastNormalCmd;
-        } else if(this.mode === Mode.VISUAL) {
+        } else if (this.mode === Mode.VISUAL) {
             return this.lastVisualCmd;
         }
     }

@@ -19,8 +19,8 @@ async function replaceRange(acArg: ActionArg): Promise<ActionArg> {
 }
 async function copyRange(acArg: ActionArg): Promise<ActionArg> {
     let selectedString = acArg.editor.document.getText(acArg.range);
-    if(acArg.range) {
-        if(acArg.lineOp) {
+    if (acArg.range) {
+        if (acArg.lineOp) {
             selectedString = '^$' + selectedString;
         }
         acArg.v.copyReg(selectedString);
