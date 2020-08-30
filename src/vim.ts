@@ -45,9 +45,15 @@ export class Vim {
     public resumeNormal(editor: vscode.TextEditor) {
         const curPos = editor.selection.active;
         switch (this.mode) {
-            case Mode.VISUAL: {
+            case Mode.VISUAL:
+            case Mode.INSERT: {
                 editor.selection = new vscode.Selection(curPos, curPos);
                 this.setMode(Mode.NORMAL);
+                break;
+            }
+            case Mode.NORMAL: {
+                editor.selection = new vscode.Selection(curPos, curPos);
+                this.resetParser();
                 break;
             }
             default: {
