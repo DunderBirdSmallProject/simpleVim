@@ -156,23 +156,23 @@ function strActionWrapper(cmds: string[]): Action {
  */
 export let operation0Dict: ActionDict = {
     "i": setInsertMode,
-    "a": opActionWrapper(async (acArg: ActionArg) => {
+    "a": async (acArg: ActionArg) => {
         await moveCursorWrapper(motion.rightChar)(acArg);
         await setInsertMode(acArg);
         return acArg;
-    }),
+    },
     "v": setVisualModeNotLine,
     "V": setVisualModeLine,
-    "o": opActionWrapper(async (acArg: ActionArg) => {
+    "o": async (acArg: ActionArg) => {
         await enterNewLine(acArg, true, true);
         await setInsertMode(acArg);
         return acArg;
-    }),
-    "O": opActionWrapper(async (acArg: ActionArg) => {
+    },
+    "O": async (acArg: ActionArg) => {
         await enterNewLine(acArg, false, true);
         await setInsertMode(acArg);
         return acArg;
-    }),
+    },
     "u": opActionWrapper(async (acArg: ActionArg) => {
         await vscode.commands.executeCommand('undo');
         return acArg;
