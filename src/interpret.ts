@@ -16,13 +16,13 @@ interface CompileResult {
 
 function compile(parseResult: NormalResult): CompileResult | undefined {
     const editor = vscode.window.activeTextEditor;
-    if(!editor) {
+    if (!editor) {
         return;
     }
     const curPos = editor.selection.active;
     const isOperation1 = parseResult.operationStr in operation1Dict;
     const isOperation0 = parseResult.operationStr in operation0Dict;
-    if(parseResult.operationStr in virtualDict) {
+    if (parseResult.operationStr in virtualDict) {
         return {
             repeat: 1,
             operation: virtualDict[parseResult.operationStr],
@@ -30,34 +30,34 @@ function compile(parseResult: NormalResult): CompileResult | undefined {
             arg: parseResult.arg,
         };
     }
-    else if(isOperation(parseResult.operationStr)) {
+    else if (isOperation(parseResult.operationStr)) {
         let f: Action;
-        if(isOperation0) {
+        if (isOperation0) {
             f = operation0Dict[parseResult.operationStr];
-        } else if(isOperation1) {
+        } else if (isOperation1) {
             f = operation1Dict[parseResult.operationStr];
         } else {
             f = operation2Dict[parseResult.operationStr];
         }
 
-        let compileResult : CompileResult = {
-            repeat: Number(parseResult.cntOperationStr), 
+        let compileResult: CompileResult = {
+            repeat: Number(parseResult.cntOperationStr),
             operation: f,
             range: new vscode.Range(curPos, curPos),
             arg: parseResult.arg,
             strCmdArg: parseResult.strCmd,
         };
-        
-        if(parseResult.motionStr !== "" && isOperation1) {
-            if(parseResult.motionStr === parseResult.operationStr) {
+
+        if (parseResult.motionStr !== "" && isOperation1) {
+            if (parseResult.motionStr === parseResult.operationStr) {
                 // replicate commands in operation1 means select the whole line
                 compileResult.range = motion.wholeLineWithSep(editor, curPos);
                 compileResult.lineOp = true;
                 return compileResult;
             }
             let getPos: (pos: vscode.Position) => vscode.Range;
-            if(isMotion(parseResult.motionStr)) {
-                if(parseResult.motionStr in motion0Dict) {
+            if (isMotion(parseResult.motionStr)) {
+                if (parseResult.motionStr in motion0Dict) {
                     getPos = motion0Dict[parseResult.motionStr];
                 }
                 else {
@@ -67,7 +67,7 @@ function compile(parseResult: NormalResult): CompileResult | undefined {
                 }
                 let tmpRange = getPos(curPos);
                 const initStart = tmpRange.start;
-                for(let i = 1; i < Number(parseResult.cntMotionStr); i++) {
+                for (let i = 1; i < Number(parseResult.cntMotionStr); i++) {
                     tmpRange = getPos(tmpRange.end);
                 }
                 compileResult.range = new vscode.Range(initStart, tmpRange.end);
@@ -81,17 +81,17 @@ function compile(parseResult: NormalResult): CompileResult | undefined {
 
 export async function runAction(parseResult: NormalResult, editor: vscode.TextEditor, v: Vim) {
     let compileResult = compile(parseResult);
-    if(compileResult) {
-        if(parseResult.operationStr in operation1Dict && v.getMode() === Mode.VISUAL) {
+    if (compileResult) {
+        if (parseResult.operationStr in operation1Dict && v.getMode() === Mode.VISUAL) {
             compileResult.range = new vscode.Range(editor.selection.start, editor.selection.end);
-            if(v.getVisualLine()) {
+            if (v.getVisualLine()) {
                 compileResult.lineOp = true;
             }
             compileResult.repeat = 1;
         }
         const repeat = compileResult.repeat;
-        for(let i = 0; i < repeat; i++) {
-            if(!compileResult) {
+        for (let i = 0; i < repeat; i++) {
+            if (!compileResult) {
                 break;
             }
             await compileResult.operation({

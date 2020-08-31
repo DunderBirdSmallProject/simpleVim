@@ -24,7 +24,7 @@ export interface NormalResult {
     cntOperationStr: string,
     arg: string,
     isVirtual?: boolean,
-    strCmd ?: string[]
+    strCmd?: string[]
 }
 
 function getCharType(c: string, state: ParseState): CharType {
@@ -35,34 +35,33 @@ function getCharType(c: string, state: ParseState): CharType {
     const isOp2 = c in operation2Dict;
     const isV = c in virtualDict;
     const isN = "1234567890".indexOf(c) !== -1;
-    if(state === ParseState.motion) {
-        if(isM0) {
+    if (state === ParseState.motion) {
+        if (isM0) {
             return CharType.motion0;
-        } else if(isM1) {
+        } else if (isM1) {
             return CharType.motion1;
-        } else if(isN) {
+        } else if (isN) {
             return CharType.number;
-        } else if(isOp1) {
+        } else if (isOp1) {
             return CharType.operation1;
         }
-    } else if(state === ParseState.operation) {
-        if(isOp0) {
+    } else if (state === ParseState.operation) {
+        if (isOp0) {
             return CharType.operation0;
-        } else if(isOp1) {
+        } else if (isOp1) {
             return CharType.operation1;
-        } else if(isOp2) {
+        } else if (isOp2) {
             return CharType.operation2;
-        } else if(isN) {
+        } else if (isN) {
             return CharType.number;
-        } else if(isV) {
+        } else if (isV) {
             return CharType.virtual;
         }
     }
     return CharType.None;
 }
 
-export class NormalParser
-{
+export class NormalParser {
     /* used for parse commands used in normal mode */
     protected cntOperationStr: string = "";
     protected operationStr: string = "";
@@ -84,7 +83,7 @@ export class NormalParser
         this.motionStr = "";
         this.cntMotionStr = "";
         this.cntOperationStr = "";
-        this.operationStr ="";
+        this.operationStr = "";
         this.arg = "";
         this.cmdStringBuffer = "";
         this.readOperationCnt = false;
@@ -109,13 +108,13 @@ export class NormalParser
         this.reset();
         return result;
     }
-    public parse(c: string): NormalResult | undefined  {
+    public parse(c: string): NormalResult | undefined {
         const cType = getCharType(c, this.state);
-        if(this.state === ParseState.operation) {
+        if (this.state === ParseState.operation) {
             this.cmdStringBuffer += c[0];
-            if(isprefixOfCmd(this.cmdStringBuffer)) {
+            if (isprefixOfCmd(this.cmdStringBuffer)) {
                 const cmdStrList = getCmd(this.cmdStringBuffer);
-                if(cmdStrList) {
+                if (cmdStrList) {
                     this.operationStr = '|';
                     let result = this._normal_compactReset();
                     result.strCmd = cmdStrList;
@@ -125,9 +124,9 @@ export class NormalParser
                 this.cmdStringBuffer = c[0];
             }
         }
-        switch(this.state) {
+        switch (this.state) {
             case ParseState.operation: {
-                switch(cType) {
+                switch (cType) {
                     case CharType.number: {
                         this.cntOperationStr += c[0];
                         this.readOperationCnt = true;
@@ -160,7 +159,7 @@ export class NormalParser
                 break;
             }
             case ParseState.motion: {
-                switch(cType) {
+                switch (cType) {
                     case CharType.number: {
                         this.cntMotionStr += c[0];
                         this.readMotionCnt = true;
@@ -194,11 +193,10 @@ export class NormalParser
     }
 };
 
-export class InsertParser
-{
+export class InsertParser {
     private buffer: string;
     private escStr: string;
-    
+
     constructor() {
         this.buffer = "";
         this.escStr = getSvimEsc();
@@ -209,11 +207,11 @@ export class InsertParser
     }
     public parse(input: string) {
         this.buffer += input[0];
-        if(this.escStr.indexOf(this.buffer) === 0) {
-            if(this.escStr === this.buffer) {
+        if (this.escStr.indexOf(this.buffer) === 0) {
+            if (this.escStr === this.buffer) {
                 return true;
             }
-        } 
+        }
         else {
             this.buffer = input[0] === ',' ? ',' : '';
         }
@@ -221,16 +219,15 @@ export class InsertParser
     }
 }
 
-export class VisualParser extends NormalParser
-{
+export class VisualParser extends NormalParser {
     constructor() {
         super();
     }
     public parse(c: string): NormalResult | undefined {
         const cType = getCharType(c, this.state);
-        switch(this.state) {
+        switch (this.state) {
             case ParseState.operation: {
-                switch(cType) {
+                switch (cType) {
                     case CharType.number: {
                         this.cntOperationStr += c[0];
                         this.readOperationCnt = true;

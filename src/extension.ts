@@ -7,24 +7,24 @@ export function activate(context: vscode.ExtensionContext) {
     }
     let sVim = new Vim();
     sVim.setMode(Mode.NORMAL);
-    registerCommand('type', function(args) {
-        if(!vscode.window.activeTextEditor) {
+    registerCommand('type', function (args) {
+        if (!vscode.window.activeTextEditor) {
             return;
         }
         sVim.getInput(args.text);
     });
-    registerCommand('extension.svim_escape', function() {
-        if(!vscode.window.activeTextEditor) {
+    registerCommand('extension.svim_escape', function () {
+        if (!vscode.window.activeTextEditor) {
             return;
         }
-        sVim.setMode(Mode.NORMAL);
+        sVim.resumeNormal(vscode.window.activeTextEditor);
     });
-    registerCommand('extension.svim_toggle', function() {
-        if(!vscode.window.activeTextEditor) {
+    registerCommand('extension.svim_toggle', function () {
+        if (!vscode.window.activeTextEditor) {
             return;
         }
-        sVim.setMode(Mode.NORMAL);
+        sVim.resumeNormal(vscode.window.activeTextEditor);
     });
 }
 
-export function deactivate() {}
+export function deactivate() { }

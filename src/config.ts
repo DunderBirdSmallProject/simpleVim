@@ -19,15 +19,15 @@ interface CmdStr {
 let cmdList = vscode.workspace.getConfiguration().get<CmdStr>('svim.svimCmd');
 
 export function isprefixOfCmd(str: string): boolean {
-    for(let cmdStr in cmdList) {
-        if(cmdStr.indexOf(str) === 0) {
+    for (let cmdStr in cmdList) {
+        if (cmdStr.indexOf(str) === 0) {
             return true;
         }
     }
     return false;
 }
 export function getCmd(str: string): string[] | undefined {
-    if(cmdList && str in cmdList) {
+    if (cmdList && str in cmdList) {
         return cmdList[str];
     }
 }
