@@ -55,7 +55,7 @@ export function isMotion(opStr: string): boolean {
     return opStr in motion0Dict || opStr in motion1Dict;
 }
 async function setInsertMode(acArg: ActionArg): Promise<ActionArg> {
-    acArg.v.resumeNormal(acArg.editor);
+    acArg.v.resumeNormalMultiCursor(acArg.editor);
     acArg.v.setMode(Mode.INSERT);
     return acArg;
 }

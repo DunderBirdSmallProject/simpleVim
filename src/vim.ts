@@ -39,9 +39,6 @@ export class Vim {
             this.setMode(Mode.NORMAL);
         });
     }
-    /*
-     * change State to Normal
-     */
     public resumeNormal(editor: vscode.TextEditor) {
         const curPos = editor.selection.active;
         switch (this.mode) {
@@ -61,6 +58,19 @@ export class Vim {
             }
         }
     }
+    public resumeNormalMultiCursor(editor: vscode.TextEditor) {
+        editor.selections.map(selection => {
+            const curPos = selection.active;
+            return new vscode.Selection(curPos, curPos);
+        });
+        if (this.mode === Mode.VISUAL || this.mode === Mode.INSERT) {
+            this.setMode(Mode.NORMAL);
+        }
+        else {
+            this.resetParser();
+        }
+    }
+
     public noticeMove(editor: vscode.TextEditor, pos: vscode.Position) {
         switch (this.mode) {
             case Mode.INSERT:
@@ -110,10 +120,16 @@ export class Vim {
                     if (this.insertParser.parse(input)) {
                         this.setMode(Mode.NORMAL);
                         editor.edit(e => {
-                            const curPos = editor.selection.active;
+                            const curPoses = editor.selections.map(selection => {
+                                const curPos = selection.active;
+                                return new vscode.Selection(curPos, curPos);
+                            });
                             // the last character of SvimEsc wasn't printed
-                            const startPos = new vscode.Position(curPos.line, curPos.character - getSvimEsc().length + 1);
-                            e.delete(new vscode.Range(startPos, curPos));
+                            for (let pos of curPoses) {
+                                const curPos = pos.active;
+                                const startPos = new vscode.Position(curPos.line, curPos.character - getSvimEsc().length + 1);
+                                e.delete(new vscode.Range(startPos, curPos));
+                            }
                         });
                     } else {
                         vscode.commands.executeCommand('default:type', {
