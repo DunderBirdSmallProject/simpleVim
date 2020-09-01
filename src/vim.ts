@@ -130,6 +130,8 @@ export class Vim {
                                 const startPos = new vscode.Position(curPos.line, curPos.character - getSvimEsc().length + 1);
                                 e.delete(new vscode.Range(startPos, curPos));
                             }
+                        }, {
+                            undoStopBefore: false, undoStopAfter: false
                         });
                     } else {
                         vscode.commands.executeCommand('default:type', {
