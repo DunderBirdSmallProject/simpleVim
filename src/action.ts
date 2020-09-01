@@ -185,7 +185,6 @@ export let operation0Dict: ActionDict = {
                 await enterNewLine(acArg, true);
             }
             toInsert = tool.stripRight(toInsert);
-            console.log(toInsert.length);
             await acArg.editor.edit((e) => {
                 e.insert(acArg.editor.selection.active, <string>toInsert);
             });
@@ -458,7 +457,9 @@ export let motion1Dict: Motion1Dict = {
             lstChar = '}';
         } else if (c === '<') {
             lstChar = '>';
-        } else {
+        } else if(c === '>') {
+            lstChar = '<';  // for tags like <p>...</p>
+        }else {
             lstChar = c;
         }
         const prePos = motion.previousCharOnLine(pos, fstChar);
