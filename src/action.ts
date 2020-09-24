@@ -100,9 +100,18 @@ function moveCursorWrapper(motionFunc: Pos2Pos) {
     return async (acArg: ActionArg) => {
         const curPos = acArg.editor.selection.active;
         const nextPos = motionFunc(curPos);
-        acArg.v.noticeMove(acArg.editor, nextPos);
-        //editor.selection = new vscode.Selection(nextPos, nextPos);
-        // acArg.editor.revealRange(new vscode.Range(motion.startLine(nextPos), motion.endLine(nextPos)));
+        if (acArg.v.getMode() !== Mode.VISUAL) {
+            acArg.editor.selections = acArg.editor.selections.map(
+                selection => {
+                    const pos = selection.active;
+                    const nextPos = motionFunc(pos);
+                    return new vscode.Selection(nextPos, nextPos);
+                }
+            )
+        }
+        else {
+            acArg.v.noticeMove(acArg.editor, nextPos);
+        }
         acArg.editor.revealRange(new vscode.Range(nextPos, nextPos));
         return acArg;
     };
@@ -457,9 +466,9 @@ export let motion1Dict: Motion1Dict = {
             lstChar = '}';
         } else if (c === '<') {
             lstChar = '>';
-        } else if(c === '>') {
+        } else if (c === '>') {
             lstChar = '<';  // for tags like <p>...</p>
-        }else {
+        } else {
             lstChar = c;
         }
         const prePos = motion.previousCharOnLine(pos, fstChar);
